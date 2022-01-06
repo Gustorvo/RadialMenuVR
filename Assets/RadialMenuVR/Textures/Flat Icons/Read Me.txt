@@ -1,0 +1,9 @@
+v1.0
+
+Community & Support available on Discord
+https://discord.gg/6X3xrRc
+
+https://assetstore.unity.com/packages/2d/gui/icons/ux-flat-icons-free-202525
+Please consider leaving a review on the Unity Asset Store.
+
+Additional icons, borders, cursors, themes and more are available from Heathen on the Unity Asset Store.
