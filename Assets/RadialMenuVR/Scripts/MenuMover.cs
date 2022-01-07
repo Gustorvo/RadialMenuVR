@@ -1,7 +1,5 @@
 using NaughtyAttributes;
-using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 namespace Gustorvo.RadialMenu
@@ -109,15 +107,23 @@ namespace Gustorvo.RadialMenu
             {
                 StopCoroutine(_popupCoroutine);
             }
-            _popupCoroutine = StartCoroutine(SetTargetPositionsRoutine());
+            if (_menu.Active)
+            {
+                // set target positions immediately for activation
+                _targetPositions = _menu.ItemsPositions.ToArray();
+            }
+            else
+            { // otherwise (for deactivation) set delayed target position for smooth sequential animation of each item
+                _popupCoroutine = StartCoroutine(SetDelayedTargetPositionsRoutine());
+            }
         }
 
-        private IEnumerator SetTargetPositionsRoutine()
+        private IEnumerator SetDelayedTargetPositionsRoutine()
         {
             float delay = _lerpPopupTime / _menu.ItemList.Count;
             for (int i = 0; i < _menu.ItemList.Count; i++)
             {
-                _targetPositions[i] = _menu.Active ? _menu.ItemsPositions[i] : Vector3.zero;
+                _targetPositions[i] = Vector3.zero;
                 yield return new WaitForSecondsRealtime(delay);
             }
         }
@@ -128,7 +134,7 @@ namespace Gustorvo.RadialMenu
 
         [Button("Previous")]
         public void DebugPrev() => _menu.ShiftItems(-1);
-       
+
         [Button("ToggleVisibility")]
         public void DebugToggleVisibility() => _menu.ToogleVisibility();
 

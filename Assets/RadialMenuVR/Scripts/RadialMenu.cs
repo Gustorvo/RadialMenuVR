@@ -19,9 +19,10 @@ namespace Gustorvo.RadialMenu
         public event Action<int> OnRotated; // direction (step) of chosen relative to the prev one: 1/-1 
         public event Action OnToggleVisibility;
         public Transform Anchor => _carouselAnchor;
-        public float Radius => _menuRadius;
-        public float DistToNextItemDeg => ItemList.Count > 0 ? 360f / ItemList.Count : 0f; // distance (in degrees) between 1st and 2nd elements in carousel    
-        public float CurrentRadius => Vector3.Distance(ItemList[0].Icon.transform.position, transform.position); // current distance (in m) between 1st elements and center of the radial menu
+        public float Radius => _menuRadius;        
+        public float DistToNextItemDeg => ItemList.Count > 0 ? 360f / ItemList.Count : 0f; // angular distance (in degrees) between each elements in the menu    
+        public float CurrentRadius => ItemList[0].Icon.transform.localPosition.y; // current radius (in m), calculated using distance between the 1st element and center of the radial menu
+
         public List<MenuItem> ItemList { get; private set; } = new List<MenuItem>();
         /// <summary>
         /// index of currently chosen item in menu
