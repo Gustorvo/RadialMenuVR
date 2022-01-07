@@ -109,6 +109,7 @@ namespace Gustorvo.RadialMenu
         /// <param name="step"></param>
         public void ShiftItems(int step)
         {
+            if (!Active) return;
             _prevIndex = ChosenIndex;
             ChosenIndex = step;
             InvokeChosen(step);
