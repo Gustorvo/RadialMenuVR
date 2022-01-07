@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 namespace Gustorvo.RadialMenu
@@ -71,7 +69,7 @@ namespace Gustorvo.RadialMenu
             Vector3[] fromScale = _menu.ItemList.ConvertAll(i => i.Icon.transform.localScale).ToArray();
             while (t != 1f)
             {
-                current = _menu.CurrentRadius;
+                current = _menu.CurrentRadius;               
                 t = Mathf.InverseLerp(a, b, current);
                 for (int i = 0; i < _menu.ItemList.Count; i++)
                 {
