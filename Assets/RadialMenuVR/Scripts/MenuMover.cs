@@ -17,7 +17,14 @@ namespace Gustorvo.RadialMenu
         /// is menu currently moming/rotating?
         /// </summary>
         public bool IsMoving => _velocity != 0f;
-
+        public RadialMenu Menu
+        {
+            get
+            {
+                if (_menu == null) _menu = GetComponent<RadialMenu>();
+                return _menu;
+            }
+        }
         private RadialMenu _menu;
         private float _velocity;
         private float _curAngleZ;
@@ -32,11 +39,12 @@ namespace Gustorvo.RadialMenu
 
         private void Awake()
         {
-            _menu = GetComponent<RadialMenu>();
-            _menu.OnRotated -= SetTargetAngle;
-            _menu.OnRotated += SetTargetAngle;
-            _menu.OnToggleVisibility -= SetTargetPosition;
-            _menu.OnToggleVisibility += SetTargetPosition;
+            Menu.OnRotated -= SetTargetAngle;
+            Menu.OnRotated += SetTargetAngle;
+            Menu.OnToggleVisibility -= SetTargetPosition;
+            Menu.OnToggleVisibility += SetTargetPosition;
+            Menu.OnMenuRebuild -= SetTargetPosition;
+            Menu.OnMenuRebuild += SetTargetPosition;
         }
 
         private void Start()
@@ -44,9 +52,9 @@ namespace Gustorvo.RadialMenu
             Init();
         }
 
-        private void Init()
+        public void Init()
         {
-            _targetPositions = _menu.ItemsPositions.ToArray();
+            _targetPositions = Menu.ItemsInitialPositions.ToArray();
             int count = _targetPositions.Length;
             _currentPositions = new Vector3[count];
             _curAngleZ = 0.0f;
@@ -62,28 +70,28 @@ namespace Gustorvo.RadialMenu
 
 
         private void Update()
-        {
-            transform.position = _menu.Anchor.position;
-            Rotate();
+        {            
+            SetPositionAndRotation();
             PopUp();
         }
 
-        private void Rotate()
+        private void SetPositionAndRotation()
         {
             // tween angle using numeric springing          
             _rotationSpring.SetGoing(ref _curAngleZ, ref _velocity, _targetAngleZ);
-            Quaternion newRot = _menu.Anchor.rotation * Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
-            transform.rotation = newRot;
+            Quaternion newRot = Menu.Rotation * Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+            Menu.Rotation = newRot;
             // by setting forward vector, we essentially rotate each item to align with up vector
-            _menu.ItemList.ForEach(i => i.Icon.transform.forward = _menu.Anchor.forward);
+            Menu.ItemList.ForEach(i => i.Icon.transform.forward = Menu.Anchor.forward);
+            Menu.SetPosition();
         }
 
         private void PopUp()
         {
-            for (int i = 0; i < _menu.ItemList.Count; i++)
+            for (int i = 0; i < Menu.ItemList.Count; i++)
             {
                 _popupSpring[i].SetGoing(ref _currentPositions[i], _targetPositions[i]);
-                _menu.ItemList[i].Icon.transform.localPosition = _currentPositions[i];
+                Menu.ItemList[i].Icon.transform.localPosition = _currentPositions[i];
             }
         }
 
@@ -91,12 +99,12 @@ namespace Gustorvo.RadialMenu
         /// Returns the interpolator (t) between current and target rotation angles on Z axis
         /// </summary>
         /// <returns></returns>
-        public float GetInterpolator() => Mathf.InverseLerp(_targetAngleZ - (_menu.DistToNextItemDeg * _step), _targetAngleZ, _curAngleZ);
+        public float GetInterpolator() => Mathf.InverseLerp(_targetAngleZ - (Menu.DistToNextItemDeg * _step), _targetAngleZ, _curAngleZ);
 
         private void SetTargetAngle(int step)
         {
             _step = step;
-            _targetAngleZ += _menu.DistToNextItemDeg * step;
+            _targetAngleZ += Menu.DistToNextItemDeg * step;
         }
 
         private void SetTargetPosition()
@@ -107,10 +115,10 @@ namespace Gustorvo.RadialMenu
             {
                 StopCoroutine(_popupCoroutine);
             }
-            if (_menu.Active)
+            if (Menu.Active)
             {
                 // set target positions immediately for activation
-                _targetPositions = _menu.ItemsPositions.ToArray();
+                _targetPositions = Menu.ItemsInitialPositions.ToArray();
             }
             else
             { // otherwise (for deactivation) set delayed target position for smooth sequential animation of each item
@@ -120,8 +128,8 @@ namespace Gustorvo.RadialMenu
 
         private IEnumerator SetDelayedTargetPositionsRoutine()
         {
-            float delay = _lerpPopupTime / _menu.ItemList.Count;
-            for (int i = 0; i < _menu.ItemList.Count; i++)
+            float delay = _lerpPopupTime / Menu.ItemList.Count;
+            for (int i = 0; i < Menu.ItemList.Count; i++)
             {
                 _targetPositions[i] = Vector3.zero;
                 yield return new WaitForSecondsRealtime(delay);
@@ -130,13 +138,13 @@ namespace Gustorvo.RadialMenu
 
         #region Debug
         [Button("Next")]
-        public void DebugNext() => _menu.ShiftItems(1);
+        public void DebugNext() => Menu.ShiftItems(1);
 
         [Button("Previous")]
-        public void DebugPrev() => _menu.ShiftItems(-1);
+        public void DebugPrev() => Menu.ShiftItems(-1);
 
         [Button("ToggleVisibility")]
-        public void DebugToggleVisibility() => _menu.ToogleVisibility();
+        public void DebugToggleVisibility() => Menu.ToogleVisibility();
 
         #endregion
     }
