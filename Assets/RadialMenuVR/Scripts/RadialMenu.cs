@@ -18,36 +18,27 @@ namespace Gustorvo.RadialMenu
         [SerializeField] Transform _menuAnchor; // menu will move after the anchor
         [SerializeField, OnValueChanged("OnRadiusChangedCallback")] bool _radiusChangesScale = true;
         [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(0.1f, 2f)] float _menuRadius = 0.085f;
+        [SerializeField, OnValueChanged("OnMenuTypeChangedCallback")] MenuType _type = MenuType.FullCircle;
 
 
         public event Action<MenuItem> OnItemChosen; // fist choose
         public event Action<MenuItem> OnItemSelected; // then select
-        public event Action<int> OnRotated; // direction (step) of chosen relative to the prev one: 1/-1 
+        public event Action<int> OnStep; // direction (step) of chosen relative to the prev one: 1/-1 
         public event Action OnToggleVisibility;
         public event Action OnMenuRebuild; // get called when the menu radius has changes, or/and item(s) scale(s) changed
         public Transform Anchor => _menuAnchor;
         public Transform Parent => _parent;
         public bool RadiusChangesScale => _radiusChangesScale;
         public float Radius => _menuRadius;
-        public float DistToNextItemDeg => ItemList.Count > 0 ? 360f / ItemList.Count : 0f; // angular distance (in degrees) between each elements in the menu    
-
+        public float DistToNextItemDeg => ItemList.Count > 0 ? SpaceDegrees / ItemList.Count : 0f; // angular distance (in degrees) between each elements in the menu    
+        public float SpaceDegrees => SpaceRad * Mathf.Rad2Deg;
+        public float SpaceRad => _type == MenuType.FullCircle ? Mathf.PI * 2f : Mathf.PI;
         public List<MenuItem> ItemList { get; private set; } = new List<MenuItem>();
         /// <summary>
         /// index of currently chosen item in menu
         /// </summary>
-        public int ChosenIndex
-        {
-            get => _chosen;
-            private set
-            { // circular loop => when max is reached, start from the beginning
-                if (value == 0) return; // value hansn't changed (the same as previous)
-                int nextChosen = _chosen + value;
-                if (nextChosen > _capacity) _chosen = 0;
-                else if (nextChosen < 0) _chosen = _capacity;
-                else _chosen = nextChosen;
-            }
-        }
-
+       [field: SerializeField, ReadOnly]
+        public int ChosenIndex { get; private set; }
         public MenuScaler Scaler
         {
             get
@@ -56,13 +47,8 @@ namespace Gustorvo.RadialMenu
                 return _scaler;
             }
         }
-
         public List<Vector3> ItemsInitialPositions { get; private set; } = new List<Vector3>();
-        public bool Active { get; private set; } = false;
-
-        private int _chosen;
-        private int _capacity => ItemsInitialPositions.Count - 1;
-       
+        public bool Active { get; private set; } = false; 
         public Quaternion Rotation
         {
             get
@@ -80,13 +66,15 @@ namespace Gustorvo.RadialMenu
             }
         }
 
+        public bool Initialized { get; private set; } = false;
+
         internal void SetPosition(Vector3? position = null)
         {
             if (position == null)
                 position = Anchor.position;
-            Parent.position = Anchor.position;
+            Parent.position = position.Value;
         }
-
+        private int _capacity => ItemsInitialPositions.Count - 1;
         private int _prevIndex;
         private MenuScaler _scaler;
         private void Awake()
@@ -103,6 +91,7 @@ namespace Gustorvo.RadialMenu
             CreateItemListFromChildren();
             ItemsInitialPositions = GetItemsPositions();
             Scaler.CalculateScale();
+            Initialized = true;
         }
 
         private void CreateItemListFromChildren()
@@ -140,12 +129,12 @@ namespace Gustorvo.RadialMenu
         [Button(enabledMode: EButtonEnableMode.Editor)]
         private void DestroyItem()
         {
+            if (!Initialized) Init();
             if (ItemList.Count > 2)
             {
                 RemoveItem(ItemList.LastOrDefault(), true);
             }
             else Debug.Log("Can't remove since there should be at least 2 items in the menu (for it to work)!");
-
         }
 
         private void Rebuild()
@@ -201,9 +190,9 @@ namespace Gustorvo.RadialMenu
                 }
                 Vector3 GetPosition(int i)
                 {
-                    float fullTurnRad =  Mathf.PI *2f;
+
                     float ratio = i / (float)ItemList.Count;
-                    float angRad = ratio * fullTurnRad;
+                    float angRad = ratio * SpaceRad;
                     float a = Mathf.Sin(angRad);
                     float b = Mathf.Cos(angRad);
                     return new Vector3(a, b, 0f) * _menuRadius;
@@ -220,10 +209,26 @@ namespace Gustorvo.RadialMenu
         {
             if (!Active) return;
             _prevIndex = ChosenIndex;
-            ChosenIndex = step;
-            InvokeChosen(step);
+            if (SetChosenIndex(step) == _prevIndex) step = 0;
+            InvokeMenuChange(step);
         }
 
+        private int SetChosenIndex(int step)
+        {
+            if (_type == MenuType.HalfCircle)
+            {
+                // don't do circular loop, but stop when on last/first element
+                ChosenIndex = Mathf.Clamp(ChosenIndex + step, 0, _capacity);
+                return ChosenIndex;
+            }
+
+            // circular loop => when max is reached, start from the beginning (0th element)           
+            int nextChosen = ChosenIndex + step;
+            if (nextChosen > _capacity) ChosenIndex = 0; // shift forward - start from 0th element
+            else if (nextChosen < 0) ChosenIndex = _capacity; // shift backwards - start from last element
+            else ChosenIndex = nextChosen;
+            return ChosenIndex;
+        }
 
         public void MakeItemChosen(GameObject chosenGO)
         {
@@ -233,7 +238,7 @@ namespace Gustorvo.RadialMenu
                 int index = ItemList.IndexOf(chosenItem);
                 if (index == _prevIndex) // index hasn't changed since last shift
                 {
-                    InvokeChosen(0);
+                    InvokeMenuChange(0);
                     return;
                 }
 
@@ -254,16 +259,14 @@ namespace Gustorvo.RadialMenu
                 int direction = clockwise ? 1 : -1;
 
                 ChosenIndex = direction;
-                InvokeChosen(direction);
-
-                //RotateCarousel(direction);
+                InvokeMenuChange(direction);
             }
         }
 
-        private void InvokeChosen(int step)
+        private void InvokeMenuChange(int step)
         {
-            OnRotated?.Invoke(step);
-            OnItemChosen?.Invoke(ItemList[_chosen]);
+            OnStep?.Invoke(step);
+            OnItemChosen?.Invoke(ItemList[ChosenIndex]);
         }
 
         private bool IsLast(int index) => index == ItemList.Count - 1;
@@ -273,5 +276,14 @@ namespace Gustorvo.RadialMenu
         {
             Rebuild();
         }
+        private void OnMenuTypeChangedCallback()
+        {
+            Rebuild();
+        }
+    }
+    public enum MenuType
+    {
+        FullCircle,
+        HalfCircle
     }
 }

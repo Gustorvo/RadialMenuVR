@@ -24,7 +24,7 @@ namespace Gustorvo.RadialMenu
         }
         private RadialMenu _menu;
         private MenuMover _mover;
-        private Coroutine _scaleCoroutine;   
+        private Coroutine _scaleCoroutine;
 
         private void Awake()
         {
@@ -36,12 +36,12 @@ namespace Gustorvo.RadialMenu
             _mover = GetComponent<MenuMover>();
             Menu.OnToggleVisibility -= ToggleByScaling;
             Menu.OnToggleVisibility += ToggleByScaling;
-            Menu.OnRotated -= ScaleWhenRotating;
-            Menu.OnRotated += ScaleWhenRotating;
+            Menu.OnStep -= ScaleWhenRotating;
+            Menu.OnStep += ScaleWhenRotating;
             Menu.OnMenuRebuild -= ScaleWhenRotating;
-            Menu.OnMenuRebuild += ScaleWhenRotating;          
+            Menu.OnMenuRebuild += ScaleWhenRotating;
         }
-       
+
         public void CalculateScale()
         {
             if (Menu.ItemList.Count < 2) return;
@@ -127,6 +127,7 @@ namespace Gustorvo.RadialMenu
         }
         public void OnScaleFactorChanged()
         {
+            if (!Menu.Initialized) Menu.Init();
             CalculateScale();
             ScaleWhenRotating();
         }

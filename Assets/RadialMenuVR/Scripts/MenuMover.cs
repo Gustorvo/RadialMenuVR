@@ -39,8 +39,8 @@ namespace Gustorvo.RadialMenu
 
         private void Awake()
         {
-            Menu.OnRotated -= SetTargetAngle;
-            Menu.OnRotated += SetTargetAngle;
+            Menu.OnStep -= SetTargetAngle;
+            Menu.OnStep += SetTargetAngle;
             Menu.OnToggleVisibility -= SetTargetPosition;
             Menu.OnToggleVisibility += SetTargetPosition;
             Menu.OnMenuRebuild -= SetTargetPosition;
