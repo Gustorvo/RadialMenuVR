@@ -201,10 +201,11 @@ namespace Gustorvo.RadialMenu
                 }
                 Vector3 GetPosition(int i)
                 {
+                    float fullTurnRad =  Mathf.PI *2f;
                     float ratio = i / (float)ItemList.Count;
-                    ratio *= 2f * Mathf.PI;
-                    float a = Mathf.Sin(ratio);
-                    float b = Mathf.Cos(ratio);
+                    float angRad = ratio * fullTurnRad;
+                    float a = Mathf.Sin(angRad);
+                    float b = Mathf.Cos(angRad);
                     return new Vector3(a, b, 0f) * _menuRadius;
                 }
             }
