@@ -18,6 +18,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField] Transform _menuAnchor; // menu will move after the anchor
         [SerializeField, OnValueChanged("OnRadiusChangedCallback")] bool _radiusChangesScale = true;
         [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(0.1f, 2f)] float _menuRadius = 0.085f;
+        [SerializeField, OnValueChanged("OnOffsetChangedCallback"), Range(-180, 180)] int _rotationOffset = 0;
         [SerializeField, OnValueChanged("OnMenuTypeChangedCallback")] MenuType _type = MenuType.FullCircle;
 
 
@@ -65,9 +66,8 @@ namespace Gustorvo.RadialMenu
                 _parent.rotation = value;
             }
         }
-
+        public float Offset => _rotationOffset;
         public bool Initialized { get; private set; } = false;
-
         internal void SetPosition(Vector3? position = null)
         {
             if (position == null)
@@ -279,6 +279,11 @@ namespace Gustorvo.RadialMenu
         private void OnMenuTypeChangedCallback()
         {
             Rebuild();
+        }
+        private void OnOffsetChangedCallback()
+        {
+            if (!Initialized) Init();
+            Parent.localEulerAngles = new Vector3(0f, 0f, _rotationOffset);
         }
     }
     public enum MenuType

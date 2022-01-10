@@ -57,7 +57,8 @@ namespace Gustorvo.RadialMenu
             _targetPositions = Menu.ItemsInitialPositions.ToArray();
             int count = _targetPositions.Length;
             _currentPositions = new Vector3[count];
-            _curAngleZ = 0.0f;
+            _curAngleZ = Menu.Offset;
+            _targetAngleZ = _curAngleZ;
             _velocity = 0.0f;
             _rotationSpring = new NumericSpring(_damping, _frequency);
             _popupSpring = new NumericSpring[count];
