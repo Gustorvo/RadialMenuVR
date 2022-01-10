@@ -20,6 +20,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(0.1f, 2f)] float _menuRadius = 0.085f;
         [SerializeField, OnValueChanged("OnOffsetChangedCallback"), Range(-180, 180)] int _rotationOffset = 0;
         [SerializeField, OnValueChanged("OnMenuTypeChangedCallback")] MenuType _type = MenuType.FullCircle;
+        [SerializeField, OnValueChanged("OnChosenOffsetChangedCallback")] ChosenOffset _chosenOffset = ChosenOffset.Start;
 
 
         public event Action<MenuItem> OnItemChosen; // fist choose
@@ -38,7 +39,7 @@ namespace Gustorvo.RadialMenu
         /// <summary>
         /// index of currently chosen item in menu
         /// </summary>
-       [field: SerializeField, ReadOnly]
+        [field: SerializeField, ReadOnly]
         public int ChosenIndex { get; private set; }
         public MenuScaler Scaler
         {
@@ -49,7 +50,7 @@ namespace Gustorvo.RadialMenu
             }
         }
         public List<Vector3> ItemsInitialPositions { get; private set; } = new List<Vector3>();
-        public bool Active { get; private set; } = false; 
+        public bool Active { get; private set; } = false;
         public Quaternion Rotation
         {
             get
@@ -91,7 +92,17 @@ namespace Gustorvo.RadialMenu
             CreateItemListFromChildren();
             ItemsInitialPositions = GetItemsPositions();
             Scaler.CalculateScale();
+            InitChosen();
             Initialized = true;
+        }
+        private void InitChosen()
+        {
+            int chosen =
+                             _chosenOffset == ChosenOffset.Middle ? ItemList.Count / 2 : // middle
+                            _chosenOffset == ChosenOffset.End ? ItemList.Count - 1 :     // end
+                            0;                                                           // start
+
+            ChosenIndex = chosen;
         }
 
         private void CreateItemListFromChildren()
@@ -149,10 +160,7 @@ namespace Gustorvo.RadialMenu
                 {
                     ItemList[i].Icon.transform.localPosition = ItemsInitialPositions[i];
                 }
-                if (RadiusChangesScale)
-                {
-                    Scaler.OnScaleFactorChanged();
-                }
+                Scaler.OnScaleFactorChanged();
             }
         }
 
@@ -190,7 +198,6 @@ namespace Gustorvo.RadialMenu
                 }
                 Vector3 GetPosition(int i)
                 {
-
                     float ratio = i / (float)ItemList.Count;
                     float angRad = ratio * SpaceRad;
                     float a = Mathf.Sin(angRad);
@@ -212,7 +219,6 @@ namespace Gustorvo.RadialMenu
             if (SetChosenIndex(step) == _prevIndex) step = 0;
             InvokeMenuChange(step);
         }
-
         private int SetChosenIndex(int step)
         {
             if (_type == MenuType.HalfCircle)
@@ -285,10 +291,20 @@ namespace Gustorvo.RadialMenu
             if (!Initialized) Init();
             Parent.localEulerAngles = new Vector3(0f, 0f, _rotationOffset);
         }
+        private void OnChosenOffsetChangedCallback()
+        {
+            Rebuild();
+        }
     }
     public enum MenuType
     {
         FullCircle,
         HalfCircle
+    }
+    public enum ChosenOffset
+    {
+        Start,
+        Middle,
+        End
     }
 }
