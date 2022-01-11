@@ -48,9 +48,11 @@ namespace Gustorvo.RadialMenu
             if (Menu.ItemList.Count < 2) return;
             if (Menu.RadiusChangesScale)
             {
-                _itemUniformScale = Menu.ItemDistance;
+                _itemUniformScale = Menu.ItemDistance * _itemScaleFactor;
             }
-            ItemsInitialScale = _itemUniformScale * _itemScaleFactor * Vector3.one;
+            else _itemUniformScale = RadialMenu.minRadius * _itemScaleFactor;
+
+            ItemsInitialScale = _itemUniformScale * Vector3.one;
         }
 
         private void ToggleByScaling()

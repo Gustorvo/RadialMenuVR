@@ -18,14 +18,15 @@ namespace Gustorvo.RadialMenu
         [SerializeField] MenuItem _menuItemsPrefab;
         [SerializeField] Transform _menuAnchor; // menu will move after the anchor
         [SerializeField, OnValueChanged("OnRadiusChangedCallback")] bool _radiusChangesScale = true;
-        [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(0.1f, 2f)] float _menuRadius = 0.085f;
+        [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(minRadius, maxRadius)] float _menuRadius = 0.085f;
         [SerializeField, OnValueChanged("OnOffsetChangedCallback"), Range(-180, 180)] int _rotationOffset = 0;
         [SerializeField, OnValueChanged("OnIndicatorOfsetChangedCallback"), Range(0f, 1f)] private float _indicatorOffset = 0.5f;  // distance from the center to the chosen
         [SerializeField, OnValueChanged("OnMenuTypeChangedCallback")] MenuType _type = MenuType.FullCircle;
         [SerializeField, OnValueChanged("OnChosenOffsetChangedCallback")] ChosenOffset _chosenOffset = ChosenOffset.Start;
         [SerializeField] RotationType _rotationType = RotationType.RotateMenu;
 
-
+        public const float minRadius = .1f;
+        public const float maxRadius = 1f;
         public event Action<MenuItem> OnItemChosen; // fist choose
         public event Action<MenuItem> OnItemSelected; // then select
         public event Action<int> OnStep; // direction (step) of chosen relative to the prev one: 1/-1 
@@ -97,6 +98,7 @@ namespace Gustorvo.RadialMenu
         private int _capacity => ItemsInitialPositions.Count - 1;
         private int _prevIndex;
         private MenuScaler _scaler;
+        
 
         private void Awake()
         {
@@ -196,9 +198,10 @@ namespace Gustorvo.RadialMenu
 
         public void SetIndicatorPositionAndScele()
         {
+            float offset = 1.5f;
             Vector3 dirToCenter = Vector3.Normalize(Vector3.zero - ItemsInitialPositions[ChosenIndex]);
-            Vector3 a = ItemsInitialPositions[ChosenIndex] + dirToCenter * Scaler.UniformScale;
-            Vector3 b = ItemsInitialPositions[ChosenIndex] - dirToCenter * Scaler.UniformScale;
+            Vector3 a = ItemsInitialPositions[ChosenIndex] + dirToCenter * Scaler.UniformScale * offset;
+            Vector3 b = ItemsInitialPositions[ChosenIndex] - dirToCenter * Scaler.UniformScale * offset;
             Vector3 newPos = Vector3.Lerp(a, b, _indicatorOffset);
             _chosenIndicator.Icon.transform.localPosition = newPos;
             _chosenIndicator.Icon.transform.localScale = Scaler.ItemsInitialScale;
