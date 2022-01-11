@@ -57,7 +57,7 @@ namespace Gustorvo.RadialMenu
             _targetPositions = Menu.ItemsInitialPositions.ToArray();
             int count = _targetPositions.Length;
             _currentPositions = new Vector3[count];
-            _curAngleZ = Menu.Offset;
+            _curAngleZ =  Menu.OffsetRotaion.eulerAngles.z;
             _targetAngleZ = _curAngleZ;
             _velocity = 0.0f;
             _rotationSpring = new NumericSpring(_damping, _frequency);
@@ -81,7 +81,7 @@ namespace Gustorvo.RadialMenu
             // tween angle using numeric springing          
             _rotationSpring.SetGoing(ref _curAngleZ, ref _velocity, _targetAngleZ);
             Quaternion newRot = Menu.Rotation * Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
-            Menu.Rotation = newRot;
+            Menu.SetRotation(newRot);
             // by setting forward vector, we essentially rotate each item to align with up vector
             Menu.ItemList.ForEach(i => i.Icon.transform.forward = Menu.Anchor.forward);
             Menu.SetPosition();

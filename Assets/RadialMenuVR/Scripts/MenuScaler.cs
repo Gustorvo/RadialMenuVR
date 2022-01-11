@@ -14,6 +14,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField, ReadOnly]
         float _itemUniformScale = 0f;
         public Vector3 ItemsInitialScale { get; private set; } = Vector3.zero;
+        public float UniformScale => _itemUniformScale;
         public RadialMenu Menu
         {
             get
@@ -47,7 +48,7 @@ namespace Gustorvo.RadialMenu
             if (Menu.ItemList.Count < 2) return;
             if (Menu.RadiusChangesScale)
             {
-                _itemUniformScale = Vector3.Distance(Menu.ItemsInitialPositions[0], Menu.ItemsInitialPositions[1]);
+                _itemUniformScale = Menu.ItemDistance;
             }
             ItemsInitialScale = _itemUniformScale * _itemScaleFactor * Vector3.one;
         }
@@ -70,7 +71,7 @@ namespace Gustorvo.RadialMenu
                     Menu.ItemList[i].Icon.transform.localScale = ItemsInitialScale;
                 }
                 Menu.ItemList[Menu.ChosenIndex].Icon.transform.localScale = ItemsInitialScale * _upscaleSelectedFactor;
-
+                Menu.SetIndicatorPositionAndScele();
             }
             else
             {
