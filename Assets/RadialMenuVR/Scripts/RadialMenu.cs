@@ -55,6 +55,7 @@ namespace Gustorvo.RadialMenu
             }
         }
         public List<Vector3> ItemsInitialPositions { get; private set; } = new List<Vector3>();
+        public ChosenIndicator Indicator => _chosenIndicator;
 
         internal void SetRotation(Quaternion newRot)
         {
@@ -62,19 +63,25 @@ namespace Gustorvo.RadialMenu
             {
                 _parent.rotation = newRot;
 
-                _chosenIndicator.transform.rotation = Rotation * OffsetRotaion;
-                _chosenIndicator.Icon.transform.forward = Anchor.forward;
+                // _chosenIndicator.transform.rotation = Rotation * OffsetRotaion;
+                Indicator.SetRotation(Rotation * OffsetRotaion);
+                Indicator.Icon.transform.forward = Anchor.forward;
             }
             else
             {
-                _parent.rotation = Rotation * OffsetRotaion; 
+                _parent.rotation = Rotation * OffsetRotaion;
 
-                _chosenIndicator.transform.rotation =  newRot;
-                _chosenIndicator.Icon.transform.forward = Anchor.forward;
+                Indicator.SetRotation(newRot);
+                Indicator.Icon.transform.forward = Anchor.forward;
             }
         }
 
-        public bool Active { get; private set; } = false;
+        private bool _active = false;
+        public bool Active
+        {
+            get => IsRunningInEditor ? true : _active;
+            private set => _active = value;
+        }
         public Quaternion Rotation
         {
             get
@@ -86,19 +93,22 @@ namespace Gustorvo.RadialMenu
                 return _parent.rotation;
             }
         }
-        public Quaternion OffsetRotaion = Quaternion.identity;
+        public Quaternion OffsetRotaion {get; private set;} = Quaternion.identity;
         public bool Initialized { get; private set; } = false;
+        public bool IsRunningInEditor => Application.isEditor && !Application.isPlaying;
         internal void SetPosition(Vector3? position = null)
         {
             if (position == null)
                 position = Anchor.position;
             Parent.position = position.Value;
-            _chosenIndicator.transform.position = position.Value;
+            Indicator.transform.position = position.Value;
         }
         private int _capacity => ItemsInitialPositions.Count - 1;
+
+
         private int _prevIndex;
         private MenuScaler _scaler;
-        
+
 
         private void Awake()
         {
@@ -145,8 +155,8 @@ namespace Gustorvo.RadialMenu
         private void SetRotationOffset()
         {
             OffsetRotaion = Quaternion.AngleAxis(_rotationOffset, Vector3.forward);
-            Parent.localRotation = OffsetRotaion;// localEulerAngles = new Vector3(0f, 0f, OffsetRotaion);
-            _chosenIndicator.transform.localRotation = OffsetRotaion; //localEulerAngles = new Vector3(0f, 0f, OffsetRotaion);
+            Parent.localRotation = OffsetRotaion;
+            Indicator.SetRotation(OffsetRotaion); 
         }
 
         internal void RemoveItem(MenuItem itemToRemove, bool destroyGO = false)
@@ -182,9 +192,8 @@ namespace Gustorvo.RadialMenu
         {
             Init();
             OnMenuRebuild?.Invoke();
-            bool isRunningInEditor = Application.isEditor && !Application.isPlaying;
 
-            if (isRunningInEditor)
+            if (IsRunningInEditor)
             {
                 for (int i = 0; i < ItemList.Count; i++)
                 {
@@ -192,19 +201,19 @@ namespace Gustorvo.RadialMenu
                 }
 
                 Scaler.OnScaleFactorChanged();
-                SetIndicatorPositionAndScele();
+                InitIndicatorPositionAndScale();
             }
-        }
-
-        public void SetIndicatorPositionAndScele()
+        }        
+        public void InitIndicatorPositionAndScale()
         {
             float offset = 1.5f;
+            float itemScale = Active ? Scaler.UniformScale : 0f;
             Vector3 dirToCenter = Vector3.Normalize(Vector3.zero - ItemsInitialPositions[ChosenIndex]);
-            Vector3 a = ItemsInitialPositions[ChosenIndex] + dirToCenter * Scaler.UniformScale * offset;
-            Vector3 b = ItemsInitialPositions[ChosenIndex] - dirToCenter * Scaler.UniformScale * offset;
+            Vector3 a = ItemsInitialPositions[ChosenIndex] + dirToCenter * itemScale * offset;
+            Vector3 b = ItemsInitialPositions[ChosenIndex] - dirToCenter * itemScale * offset;
             Vector3 newPos = Vector3.Lerp(a, b, _indicatorOffset);
-            _chosenIndicator.Icon.transform.localPosition = newPos;
-            _chosenIndicator.Icon.transform.localScale = Scaler.ItemsInitialScale;
+           Indicator.SetPositon(newPos);
+           Indicator.SetScale(Scaler.ItemsInitialScale);          
         }
 
         private IEnumerator Start()
@@ -222,6 +231,8 @@ namespace Gustorvo.RadialMenu
 
         private void ResetPositionsAndScale()
         {
+            Indicator.SetPositon(Vector3.zero);
+            Indicator.SetScale(Vector3.zero);
             for (int i = 0; i < ItemList.Count; i++)
             {
                 ItemList[i].Icon.transform.localPosition = Vector3.zero;
@@ -334,7 +345,7 @@ namespace Gustorvo.RadialMenu
         }
         private void OnOffsetChangedCallback()
         {
-            Init();            
+            Init();
         }
         private void OnChosenOffsetChangedCallback()
         {

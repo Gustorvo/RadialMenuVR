@@ -1765,7 +1765,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2413744870794411349, guid: debe934e28df1934ba76cacf6fc26fb4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.099999994
+      value: 0.061177142
       objectReference: {fileID: 0}
     - target: {fileID: 2413744870794411349, guid: debe934e28df1934ba76cacf6fc26fb4, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1913,7 +1913,7 @@ PrefabInstance:
       objectReference: {fileID: 87164175}
     - target: {fileID: 7560167499516101221, guid: debe934e28df1934ba76cacf6fc26fb4, type: 3}
       propertyPath: _indicatorOffset
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7560167499516101221, guid: debe934e28df1934ba76cacf6fc26fb4, type: 3}
       propertyPath: _radiusChangesScale

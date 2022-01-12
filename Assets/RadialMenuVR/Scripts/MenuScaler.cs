@@ -73,7 +73,7 @@ namespace Gustorvo.RadialMenu
                     Menu.ItemList[i].Icon.transform.localScale = ItemsInitialScale;
                 }
                 Menu.ItemList[Menu.ChosenIndex].Icon.transform.localScale = ItemsInitialScale * _upscaleSelectedFactor;
-                Menu.SetIndicatorPositionAndScele();
+                Menu.InitIndicatorPositionAndScale();
             }
             else
             {
@@ -101,22 +101,25 @@ namespace Gustorvo.RadialMenu
         }
 
         private IEnumerator ToggleVisibilityRoutine()
-        {
+        {             
             // toggle scale (between either "0" or "normal initial")           
             float a = Menu.ItemList[0].Icon.transform.localPosition.y; // start
             float b = Menu.Active ? Menu.Radius : 0.0001f; //end
             float currentRadius = 0f;
             float t = 0f;
             Vector3[] fromScale = Menu.ItemList.ConvertAll(i => i.Icon.transform.localScale).ToArray();
+            Vector3 newScale = Vector3.zero;
             while (t != 1f)
             {
                 currentRadius = Menu.ItemList[0].Icon.transform.localPosition.y;
                 t = Mathf.InverseLerp(a, b, currentRadius);
                 for (int i = 0; i < Menu.ItemList.Count; i++)
                 {
-                    Vector3 newScale = Vector3.Lerp(fromScale[i], GetTargetScale(i), t);
+                    newScale = Vector3.Lerp(fromScale[i], GetTargetScale(i), t);
                     Menu.ItemList[i].Icon.transform.localScale = newScale;
                 }
+                // scele indicator
+                Menu.Indicator.SetScale(newScale);
                 yield return null;
             }
         }

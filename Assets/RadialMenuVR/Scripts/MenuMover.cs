@@ -36,6 +36,7 @@ namespace Gustorvo.RadialMenu
         private int _step;
         private NumericSpring _rotationSpring;
         private NumericSpring[] _popupSpring;
+        private bool _popUp;
 
         private void Awake()
         {
@@ -57,7 +58,7 @@ namespace Gustorvo.RadialMenu
             _targetPositions = Menu.ItemsInitialPositions.ToArray();
             int count = _targetPositions.Length;
             _currentPositions = new Vector3[count];
-            _curAngleZ =  Menu.OffsetRotaion.eulerAngles.z;
+            _curAngleZ = Menu.OffsetRotaion.eulerAngles.z;
             _targetAngleZ = _curAngleZ;
             _velocity = 0.0f;
             _rotationSpring = new NumericSpring(_damping, _frequency);
@@ -71,7 +72,7 @@ namespace Gustorvo.RadialMenu
 
 
         private void Update()
-        {            
+        {
             SetPositionAndRotation();
             PopUp();
         }
@@ -89,11 +90,27 @@ namespace Gustorvo.RadialMenu
 
         private void PopUp()
         {
+            if (!_popUp) return;
+            PopupIndicator();
+            
+            // popup menu items
             for (int i = 0; i < Menu.ItemList.Count; i++)
             {
                 _popupSpring[i].SetGoing(ref _currentPositions[i], _targetPositions[i]);
                 Menu.ItemList[i].Icon.transform.localPosition = _currentPositions[i];
             }
+            // stop popping up
+            if (_currentPositions[0] == _targetPositions[0]) _popUp = false;
+        }
+
+        private void PopupIndicator()
+        {
+            float a = Menu.Active ? 0f : Menu.Radius;
+            float b = Menu.Active ? Menu.Radius : 0f;
+            float distToCenter = Vector3.Distance(_currentPositions[0], Vector3.zero);
+            float interpolator = Mathf.InverseLerp(a, b, distToCenter);
+            Vector3 indicatorPos = Vector3.Lerp(Menu.Indicator.Position, Menu.Indicator.TargetPosition, interpolator);
+            Menu.Indicator.SetPositon(indicatorPos);
         }
 
         /// <summary>
@@ -125,6 +142,7 @@ namespace Gustorvo.RadialMenu
             { // otherwise (for deactivation) set delayed target position for smooth sequential animation of each item
                 _popupCoroutine = StartCoroutine(SetDelayedTargetPositionsRoutine());
             }
+            _popUp = true;
         }
 
         private IEnumerator SetDelayedTargetPositionsRoutine()
