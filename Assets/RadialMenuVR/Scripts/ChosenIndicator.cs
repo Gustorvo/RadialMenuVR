@@ -4,44 +4,33 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ChosenIndicator : MonoBehaviour
+    public class ChosenIndicator : MonoBehaviour, IMovable
     {
         [SerializeField] Transform _icon;
         [SerializeField] RadialMenu _menu;
-        public Vector3 TargetPosition { get; private set; }
-        public Vector3 StartPosition { get; private set; }
+        public Vector3 TargetPosition => Menu.Active ? InitialPosition : Vector3.zero;
+        private Vector3 InitialPosition { get; set; }
         public GameObject Icon => _icon.gameObject;
         public Vector3 Position => Icon.transform.localPosition;
+        public RadialMenu Menu
+        {
+            get
+            {
+                if (_menu == null) _menu = GetComponentInParent<RadialMenu>();
+                return _menu;
+            }
+        }
 
         private void Awake()
         {
-            _menu.OnToggleVisibility -= SetTargetPosition;
-            _menu.OnToggleVisibility += SetTargetPosition;
-            StartPosition = Icon.transform.localPosition;
+            InitialPosition = Icon.transform.localPosition;
         }
-
-        public void SetPositon(Vector3 position)
-        {
-            Icon.transform.localPosition = position;
-        }
-
-        public void SetRotation(Quaternion rotation)
-        {
-            transform.rotation = rotation;
-        }
-
-        public void SetScale(Vector3 scale)
-        {
-            Icon.transform.localScale = scale;
-        }
-        public void SetTargetPosition()
-        {
-            Vector3 target = _menu.Active ? StartPosition : Vector3.zero;
-            TargetPosition = target;
-        }
-        private void OnDestroy()
-        {
-            _menu.OnToggleVisibility -= SetTargetPosition;
-        }
+        public void SetRotation(Quaternion rotation) => transform.rotation = rotation;
+        public void SetPositions(Vector3 position) => Icon.transform.localPosition = position;
+        public void SetScales(Vector3 scale) => Icon.transform.localScale = scale;
+        public void SetForwardVector(Vector3 forward) => Icon.transform.forward = forward;
+        public void SetPositions(Vector3[] positions) => throw new System.NotImplementedException();
+        public void SetScales(Vector3[] scales) => throw new System.NotImplementedException();
+       
     }
 }

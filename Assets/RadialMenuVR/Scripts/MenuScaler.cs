@@ -1,5 +1,7 @@
 using NaughtyAttributes;
+using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace Gustorvo.RadialMenu
@@ -14,6 +16,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField, ReadOnly]
         float _itemUniformScale = 0f;
         public Vector3 ItemsInitialScale { get; private set; } = Vector3.zero;
+        public float ChosenUpscaleFactor => _upscaleSelectedFactor;
         public float UniformScale => _itemUniformScale;
         public RadialMenu Menu
         {
@@ -26,13 +29,9 @@ namespace Gustorvo.RadialMenu
         private RadialMenu _menu;
         private MenuMover _mover;
         private Coroutine _scaleCoroutine;
+        private Vector3[] _lerpedScales;
 
         private void Awake()
-        {
-            Init();
-        }
-
-        public void Init()
         {
             _mover = GetComponent<MenuMover>();
             Menu.OnToggleVisibility -= ToggleByScaling;
@@ -42,13 +41,22 @@ namespace Gustorvo.RadialMenu
             Menu.OnMenuRebuild -= ScaleWhenRotating;
             Menu.OnMenuRebuild += ScaleWhenRotating;
         }
-
-        public void CalculateScale()
+        private void Start()
         {
-            if (Menu.ItemList.Count < 2) return;
-            if (Menu.RadiusChangesScale)
-            {
-                _itemUniformScale = Menu.ItemDistance * _itemScaleFactor;
+            Init();
+        }
+
+        public void Init()
+        {
+            _lerpedScales = new Vector3[Menu.Items.Count];
+        }
+
+        public void InitScale()
+        {
+            if (Menu.Items.Count < 2) return;
+            if (Menu.RadiusAffectsScale)
+            {              
+                _itemUniformScale = Menu.Items.DeltaDistance * _itemScaleFactor;
             }
             else _itemUniformScale = RadialMenu.minRadius * _itemScaleFactor;
 
@@ -67,12 +75,10 @@ namespace Gustorvo.RadialMenu
             bool inEditorNotPlaying = Application.isEditor && !Application.isPlaying;
 
             if (inEditorNotPlaying)
-            {
-                for (int i = 0; i < Menu.ItemList.Count; i++)
-                {
-                    Menu.ItemList[i].Icon.transform.localScale = ItemsInitialScale;
-                }
-                Menu.ItemList[Menu.ChosenIndex].Icon.transform.localScale = ItemsInitialScale * _upscaleSelectedFactor;
+            {               
+                _lerpedScales = Enumerable.Repeat(ItemsInitialScale, Menu.Items.Count).ToArray();
+                _lerpedScales[Menu.ChosenIndex] *= _upscaleSelectedFactor;                   
+                Menu.Items.SetScales(_lerpedScales);
                 Menu.InitIndicatorPositionAndScale();
             }
             else
@@ -84,57 +90,55 @@ namespace Gustorvo.RadialMenu
 
         private IEnumerator ScaleGraduallyRoutine()
         {
-            Vector3[] startScales = Menu.ItemList.ConvertAll(i => i.Icon.transform.localScale).ToArray();
+            Vector3[] fromScale = Menu.Items.GetScales();
+            Vector3[] toScale = Menu.Items.GetTargetScales();
+            toScale[Menu.ChosenIndex] *= ChosenUpscaleFactor;
             float t = 0f;
-            yield return null;
-            // while (_mover.IsMoving)
+            yield return null;          
             while (t != 1f)
             {
                 t = _mover.GetInterpolator();
-                for (int i = 0; i < Menu.ItemList.Count; i++)
+                for (int i = 0; i < Menu.Items.Count; i++)
                 {
-                    Vector3 newScale = Vector3.Lerp(startScales[i], GetTargetScale(i), t);
-                    Menu.ItemList[i].Icon.transform.localScale = newScale;
+                    _lerpedScales[i] = Vector3.Lerp(fromScale[i], toScale[i], t);
                 }
+                    Menu.Items.SetScales(_lerpedScales);// Icon.transform.localScale = newScale;
                 yield return null;
             }
         }
 
         private IEnumerator ToggleVisibilityRoutine()
-        {             
-            // toggle scale (between either "0" or "normal initial")           
-            float a = Menu.ItemList[0].Icon.transform.localPosition.y; // start
+        {
+            // toggle scale (between either "0" or "normal initial")
+            float a = 0f;
+            if (Menu.Items.TryGetItem(0, out MenuItem item))
+                a = item.Position.y; // start
             float b = Menu.Active ? Menu.Radius : 0.0001f; //end
             float currentRadius = 0f;
             float t = 0f;
-            Vector3[] fromScale = Menu.ItemList.ConvertAll(i => i.Icon.transform.localScale).ToArray();
-            Vector3 newScale = Vector3.zero;
+            Vector3[] fromScale = Menu.Items.GetScales();
+            Vector3[] toScale = Menu.Items.GetTargetScales();
+            toScale[Menu.ChosenIndex] *= ChosenUpscaleFactor;
+
             while (t != 1f)
             {
-                currentRadius = Menu.ItemList[0].Icon.transform.localPosition.y;
+                currentRadius = item.Position.y;
                 t = Mathf.InverseLerp(a, b, currentRadius);
-                for (int i = 0; i < Menu.ItemList.Count; i++)
+                for (int i = 0; i < Menu.Items.Count; i++)
                 {
-                    newScale = Vector3.Lerp(fromScale[i], GetTargetScale(i), t);
-                    Menu.ItemList[i].Icon.transform.localScale = newScale;
+                    _lerpedScales[i] = Vector3.Lerp(fromScale[i], toScale[i], t);
                 }
+                    Menu.Items.SetScales(_lerpedScales);
                 // scele indicator
-                Menu.Indicator.SetScale(newScale);
+                Menu.Indicator.SetScales(_lerpedScales[Menu.ChosenIndex]);
                 yield return null;
             }
         }
-        Vector3 GetTargetScale(int i)
-        {
-            if (!Menu.Active) return Vector3.zero;
-
-            if (i == Menu.ChosenIndex)
-                return ItemsInitialScale * _upscaleSelectedFactor;
-            return ItemsInitialScale;// * _downscaleFactor;
-        }
+      
         public void OnScaleFactorChanged()
         {
             if (!Menu.Initialized) Menu.Init();
-            CalculateScale();
+            InitScale();
             ScaleWhenRotating();
         }
     }

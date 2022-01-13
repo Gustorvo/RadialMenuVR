@@ -1,4 +1,5 @@
 using NaughtyAttributes;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -11,8 +12,8 @@ namespace Gustorvo.RadialMenu
         [SerializeField] float _damping = 0.5f;
         [SerializeField] float _frequency = 3f;
 
-        [Header("Popup values")]
-        [SerializeField] float _lerpPopupTime;
+        //[Header("Popup values")]
+        //[SerializeField] float _lerpPopupTime;
         /// <summary>
         /// is menu currently moming/rotating?
         /// </summary>
@@ -55,10 +56,10 @@ namespace Gustorvo.RadialMenu
 
         public void Init()
         {
-            _targetPositions = Menu.ItemsInitialPositions.ToArray();
-            int count = _targetPositions.Length;
+            int count = Menu.Items.Count;
+            _targetPositions = Menu.Items.GetTargetPositions(); 
             _currentPositions = new Vector3[count];
-            _curAngleZ = Menu.OffsetRotaion.eulerAngles.z;
+            _curAngleZ = Menu.RotaionOffset.eulerAngles.z;
             _targetAngleZ = _curAngleZ;
             _velocity = 0.0f;
             _rotationSpring = new NumericSpring(_damping, _frequency);
@@ -81,79 +82,68 @@ namespace Gustorvo.RadialMenu
         {
             // tween angle using numeric springing          
             _rotationSpring.SetGoing(ref _curAngleZ, ref _velocity, _targetAngleZ);
-            Quaternion newRot = Menu.Rotation * Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+            Quaternion newRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+            Menu.SetPosition();
             Menu.SetRotation(newRot);
             // by setting forward vector, we essentially rotate each item to align with up vector
-            Menu.ItemList.ForEach(i => i.Icon.transform.forward = Menu.Anchor.forward);
-            Menu.SetPosition();
+            Menu.Items.SetForwardVector(Menu.AnchorToFollow.forward);
         }
 
         private void PopUp()
         {
             if (!_popUp) return;
-            PopupIndicator();
-            
-            // popup menu items
-            for (int i = 0; i < Menu.ItemList.Count; i++)
+            LerpIndicator();
+
+            // calculate new position(s) every frame by modifying _currentPositions array
+            for (int i = 0; i < Menu.Items.Count; i++)
             {
-                _popupSpring[i].SetGoing(ref _currentPositions[i], _targetPositions[i]);
-                Menu.ItemList[i].Icon.transform.localPosition = _currentPositions[i];
+                _popupSpring[i].SetGoing(ref _currentPositions[i], _targetPositions[i]);                
             }
-            // stop popping up
+            // apply new position(s)
+            Menu.Items.SetPositions(_currentPositions);
+            
+            // stop springing
             if (_currentPositions[0] == _targetPositions[0]) _popUp = false;
         }
 
-        private void PopupIndicator()
+        private void LerpIndicator()
         {
             float a = Menu.Active ? 0f : Menu.Radius;
             float b = Menu.Active ? Menu.Radius : 0f;
             float distToCenter = Vector3.Distance(_currentPositions[0], Vector3.zero);
             float interpolator = Mathf.InverseLerp(a, b, distToCenter);
             Vector3 indicatorPos = Vector3.Lerp(Menu.Indicator.Position, Menu.Indicator.TargetPosition, interpolator);
-            Menu.Indicator.SetPositon(indicatorPos);
+            Menu.Indicator.SetPositions(indicatorPos);
         }
 
         /// <summary>
         /// Returns the interpolator (t) between current and target rotation angles on Z axis
         /// </summary>
         /// <returns></returns>
-        public float GetInterpolator() => Mathf.InverseLerp(_targetAngleZ - (Menu.DistToNextItemDeg * _step), _targetAngleZ, _curAngleZ);
+        public float GetInterpolator() => Mathf.InverseLerp(_targetAngleZ - (Menu.ItemsDelataDistDeg * _step), _targetAngleZ, _curAngleZ);
 
         private void SetTargetAngle(int step)
         {
             _step = step;
-            _targetAngleZ += Menu.DistToNextItemDeg * step;
+            _targetAngleZ += Menu.ItemsDelataDistDeg * step;
         }
 
         private void SetTargetPosition()
         {
             if (!_init) Init();
-
-            if (_popupCoroutine != null)
-            {
-                StopCoroutine(_popupCoroutine);
-            }
-            if (Menu.Active)
-            {
-                // set target positions immediately for activation
-                _targetPositions = Menu.ItemsInitialPositions.ToArray();
-            }
-            else
-            { // otherwise (for deactivation) set delayed target position for smooth sequential animation of each item
-                _popupCoroutine = StartCoroutine(SetDelayedTargetPositionsRoutine());
-            }
+            _targetPositions = Menu.Items.GetTargetPositions();           
             _popUp = true;
         }
 
-        private IEnumerator SetDelayedTargetPositionsRoutine()
-        {
-            float delay = _lerpPopupTime / Menu.ItemList.Count;
-            for (int i = 0; i < Menu.ItemList.Count; i++)
-            {
-                _targetPositions[i] = Vector3.zero;
-                yield return new WaitForSecondsRealtime(delay);
-            }
-        }
+        //private IEnumerator SetDelayedTargetPositionsRoutine()
+        //{
+        //    float delay = _lerpPopupTime / Menu.Items.Count;
+        //    for (int i = 0; i < Menu.Items.Count; i++)
+        //    {
+        //       // _targetPositions[i] = Vector3.zero;
+        //        yield return new WaitForSecondsRealtime(delay);
+        //    }
+        //}
 
         #region Debug
         [Button("Next")]
