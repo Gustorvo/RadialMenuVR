@@ -7,7 +7,6 @@ namespace Gustorvo.RadialMenu
     public class ChosenIndicator : MonoBehaviour, IMovable
     {
         [SerializeField] Transform _icon;
-        [SerializeField] RadialMenu _menu;
         public Vector3 TargetPosition => Menu.Active ? InitialPosition : Vector3.zero;
         private Vector3 InitialPosition { get; set; }
         public GameObject Icon => _icon.gameObject;
@@ -21,6 +20,7 @@ namespace Gustorvo.RadialMenu
             }
         }
 
+        private RadialMenu _menu;
         private void Awake()
         {
             InitialPosition = Icon.transform.localPosition;
@@ -31,6 +31,6 @@ namespace Gustorvo.RadialMenu
         public void SetForwardVector(Vector3 forward) => Icon.transform.forward = forward;
         public void SetPositions(Vector3[] positions) => throw new System.NotImplementedException();
         public void SetScales(Vector3[] scales) => throw new System.NotImplementedException();
-       
+
     }
 }

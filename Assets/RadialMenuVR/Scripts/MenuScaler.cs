@@ -11,10 +11,10 @@ namespace Gustorvo.RadialMenu
     public class MenuScaler : MonoBehaviour
     {
         [SerializeField, Range(1.1f, 2f), OnValueChanged("OnScaleFactorChanged")] float _upscaleSelectedFactor = 1.25f;
-        [SerializeField, OnValueChanged("OnScaleFactorChanged"), Range(0f, 1f)]
-        float _itemScaleFactor = 1f;
-        [SerializeField, ReadOnly]
-        float _itemUniformScale = 0f;
+        [SerializeField, OnValueChanged("OnScaleFactorChanged"), Range(0f, 1f)] float _itemScaleFactor = 1f;
+        [SerializeField] float _animDuration;
+        [SerializeField] AnimationCurve _animCurve;
+        [SerializeField, ReadOnly] float _itemUniformScale = 0f;
         public Vector3 ItemsInitialScale { get; private set; } = Vector3.zero;
         public float ChosenUpscaleFactor => _upscaleSelectedFactor;
         public float UniformScale => _itemUniformScale;
@@ -26,6 +26,7 @@ namespace Gustorvo.RadialMenu
                 return _menu;
             }
         }
+        private AnimCurveLerper _animCurveScaler;
         private RadialMenu _menu;
         private MenuMover _mover;
         private Coroutine _scaleCoroutine;
@@ -46,16 +47,23 @@ namespace Gustorvo.RadialMenu
             Init();
         }
 
+        //private void Update()
+        //{
+        //    Menu.Items.SetScales(_lerpedScales); // added
+
+        //}
+
         public void Init()
         {
             _lerpedScales = new Vector3[Menu.Items.Count];
+            _animCurveScaler = new AnimCurveLerper(_animCurve, _animDuration);
         }
 
         public void InitScale()
         {
             if (Menu.Items.Count < 2) return;
             if (Menu.RadiusAffectsScale)
-            {              
+            {
                 _itemUniformScale = Menu.Items.DeltaDistance * _itemScaleFactor;
             }
             else _itemUniformScale = RadialMenu.minRadius * _itemScaleFactor;
@@ -75,9 +83,9 @@ namespace Gustorvo.RadialMenu
             bool inEditorNotPlaying = Application.isEditor && !Application.isPlaying;
 
             if (inEditorNotPlaying)
-            {               
+            {
                 _lerpedScales = Enumerable.Repeat(ItemsInitialScale, Menu.Items.Count).ToArray();
-                _lerpedScales[Menu.ChosenIndex] *= _upscaleSelectedFactor;                   
+                _lerpedScales[Menu.ChosenIndex] *= _upscaleSelectedFactor;
                 Menu.Items.SetScales(_lerpedScales);
                 Menu.InitIndicatorPositionAndScale();
             }
@@ -94,15 +102,15 @@ namespace Gustorvo.RadialMenu
             Vector3[] toScale = Menu.Items.GetTargetScales();
             toScale[Menu.ChosenIndex] *= ChosenUpscaleFactor;
             float t = 0f;
-            yield return null;          
             while (t != 1f)
             {
                 t = _mover.GetInterpolator();
                 for (int i = 0; i < Menu.Items.Count; i++)
                 {
+                    //_animCurveScaler.Activate()
                     _lerpedScales[i] = Vector3.Lerp(fromScale[i], toScale[i], t);
                 }
-                    Menu.Items.SetScales(_lerpedScales);// Icon.transform.localScale = newScale;
+                   Menu.Items.SetScales(_lerpedScales);
                 yield return null;
             }
         }
@@ -128,13 +136,13 @@ namespace Gustorvo.RadialMenu
                 {
                     _lerpedScales[i] = Vector3.Lerp(fromScale[i], toScale[i], t);
                 }
-                    Menu.Items.SetScales(_lerpedScales);
+                Menu.Items.SetScales(_lerpedScales);
                 // scele indicator
-                Menu.Indicator.SetScales(_lerpedScales[Menu.ChosenIndex]);
+                Menu.Indicator.SetScales(ItemsInitialScale);
                 yield return null;
             }
         }
-      
+
         public void OnScaleFactorChanged()
         {
             if (!Menu.Initialized) Menu.Init();

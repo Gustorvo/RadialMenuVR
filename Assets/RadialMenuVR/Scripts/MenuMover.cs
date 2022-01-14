@@ -1,6 +1,7 @@
 using NaughtyAttributes;
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace Gustorvo.RadialMenu
@@ -8,16 +9,25 @@ namespace Gustorvo.RadialMenu
     [RequireComponent(typeof(RadialMenu))]
     public class MenuMover : MonoBehaviour
     {
-        [Header("Spring values")]
-        [SerializeField] float _damping = 0.5f;
-        [SerializeField] float _frequency = 3f;
+        [Header("Rotation values")]
+        [SerializeField] Easing RotateUsing = Easing.NumericSpring;
+        [SerializeField, ShowIf("RotateUsing", Easing.NumericSpring)] float _angDamping = 0.5f;
+        [SerializeField, ShowIf("RotateUsing", Easing.NumericSpring)] float _angFrequency = 3f;
+        [SerializeField, ShowIf("RotateUsing", Easing.AnimationCurve), CurveRange(0, 0, 1, 1)] AnimationCurve _angAnimationCurve;
+        [SerializeField, ShowIf("RotateUsing", Easing.AnimationCurve)] float _rotDuration = 0.5f;
+        [SerializeField, ReadOnly] private float _angVelocity;
 
-        //[Header("Popup values")]
-        //[SerializeField] float _lerpPopupTime;
-        /// <summary>
-        /// is menu currently moming/rotating?
-        /// </summary>
-        public bool IsMoving => _velocity != 0f;
+        [Header("Appear/Disapear values")]
+        [SerializeField] Easing MoveUsing = Easing.AnimationCurve;
+        [SerializeField, ShowIf("MoveUsing", Easing.NumericSpring)] float _linDamping = 0.5f;
+        [SerializeField, ShowIf("MoveUsing", Easing.NumericSpring)] float _linFrequency = 3f;
+        [SerializeField, ShowIf("MoveUsing", Easing.NumericSpring)] bool _randomizeSpringValues = true;
+        [SerializeField, ShowIf("MoveUsing", Easing.NumericSpring), EnableIf("_randomizeSpringValues"), Range(0.1f, 0.5f)] float _randomDelta = 0.15f;
+        [SerializeField, ShowIf("MoveUsing", Easing.AnimationCurve), CurveRange(0, 0, 1, 1)] AnimationCurve _linAnimationCurve;
+        [SerializeField, ShowIf("MoveUsing", Easing.AnimationCurve)] float _popupDuration = 0.5f;
+
+        public bool IsRotating => _angVelocity != 0f;
+        public bool IsSlowing { get; private set; }
         public RadialMenu Menu
         {
             get
@@ -26,18 +36,18 @@ namespace Gustorvo.RadialMenu
                 return _menu;
             }
         }
+
         private RadialMenu _menu;
-        private float _velocity;
         private float _curAngleZ;
         private float _targetAngleZ;
-        private Coroutine _popupCoroutine;
+        private Coroutine _popupCoroutine, _rotateCoroutine;
         private Vector3[] _targetPositions;
-        private Vector3[] _currentPositions;
-        private bool _init = false;
+        private Vector3[] _currentPositions;       
         private int _step;
-        private NumericSpring _rotationSpring;
-        private NumericSpring[] _popupSpring;
-        private bool _popUp;
+        private NumericSpring _springRot;
+        private NumericSpring[] _springToggling;
+        private AnimCurveLerper _animCurveRot;
+        private AnimCurveLerper[] _animCurveToggling;     
 
         private void Awake()
         {
@@ -57,60 +67,59 @@ namespace Gustorvo.RadialMenu
         public void Init()
         {
             int count = Menu.Items.Count;
-            _targetPositions = Menu.Items.GetTargetPositions(); 
+            _targetPositions = Menu.Items.GetTargetPositions();
             _currentPositions = new Vector3[count];
             _curAngleZ = Menu.RotaionOffset.eulerAngles.z;
             _targetAngleZ = _curAngleZ;
-            _velocity = 0.0f;
-            _rotationSpring = new NumericSpring(_damping, _frequency);
-            _popupSpring = new NumericSpring[count];
-            for (int i = 0; i < _popupSpring.Length; i++)
+            _angVelocity = 0.0f;
+            _springRot = new NumericSpring(_angDamping, _angFrequency);
+            _animCurveRot = new AnimCurveLerper(_angAnimationCurve, _rotDuration);
+            _springToggling = new NumericSpring[count];
+            _animCurveToggling = new AnimCurveLerper[count];
+            for (int i = 0; i < _springToggling.Length; i++)
             {
-                _popupSpring[i] = new NumericSpring(_damping * 2f, _frequency * 2f);
-            }
-            _init = true;
+                // init animation curves
+                _animCurveToggling[i] = new AnimCurveLerper(_linAnimationCurve, _popupDuration);
+
+                // init numeric springs
+                float damping = _randomizeSpringValues ? Randomize(_angDamping, _randomDelta) : _angDamping;
+                float frequency = _randomizeSpringValues ? Randomize(_angFrequency, _randomDelta) : _angFrequency;
+                _springToggling[i] = new NumericSpring(damping, frequency);
+            }          
         }
 
+        private float Randomize(float value, float offset) => UnityEngine.Random.Range(value - offset, value + offset);
 
         private void Update()
         {
             SetPositionAndRotation();
-            PopUp();
         }
 
         private void SetPositionAndRotation()
         {
-            // tween angle using numeric springing          
-            _rotationSpring.SetGoing(ref _curAngleZ, ref _velocity, _targetAngleZ);
+            // --- move and rotate menu ---
             Quaternion newRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
             Menu.SetPosition();
             Menu.SetRotation(newRot);
+
+            // --- move and rotate menu items
+            if (!IsSlowing)
+            {
+                Menu.Items.SetPositions(_currentPositions);// apply new position(s)
+            }
             // by setting forward vector, we essentially rotate each item to align with up vector
             Menu.Items.SetForwardVector(Menu.AnchorToFollow.forward);
-        }
 
-        private void PopUp()
-        {
-            if (!_popUp) return;
+            // --- indicator ---
             LerpIndicator();
-
-            // calculate new position(s) every frame by modifying _currentPositions array
-            for (int i = 0; i < Menu.Items.Count; i++)
-            {
-                _popupSpring[i].SetGoing(ref _currentPositions[i], _targetPositions[i]);                
-            }
-            // apply new position(s)
-            Menu.Items.SetPositions(_currentPositions);
-            
-            // stop springing
-            if (_currentPositions[0] == _targetPositions[0]) _popUp = false;
         }
 
         private void LerpIndicator()
         {
+            if (IsSlowing) return;
             float a = Menu.Active ? 0f : Menu.Radius;
             float b = Menu.Active ? Menu.Radius : 0f;
-            float distToCenter = Vector3.Distance(_currentPositions[0], Vector3.zero);
+            float distToCenter = _currentPositions[0].y - 0f;
             float interpolator = Mathf.InverseLerp(a, b, distToCenter);
             Vector3 indicatorPos = Vector3.Lerp(Menu.Indicator.Position, Menu.Indicator.TargetPosition, interpolator);
             Menu.Indicator.SetPositions(indicatorPos);
@@ -126,24 +135,65 @@ namespace Gustorvo.RadialMenu
         {
             _step = step;
             _targetAngleZ += Menu.ItemsDelataDistDeg * step;
+            if (_rotateCoroutine != null) StopCoroutine(_rotateCoroutine);
+            _rotateCoroutine = StartCoroutine(AnimateRotatingRoutine());
+        }
+
+        private IEnumerator AnimateRotatingRoutine()
+        {
+            bool active = true;
+            while (active)
+            {
+                if (RotateUsing == Easing.NumericSpring)
+                {
+                    _springRot.Activate(ref _curAngleZ, ref _angVelocity, _targetAngleZ);
+                }
+                else // animation curve
+                {
+                    _animCurveRot.Activate(ref _curAngleZ, ref _angVelocity, _targetAngleZ);
+                }
+                yield return null;
+                active = RotateUsing == Easing.NumericSpring ? _springRot.Active : _animCurveRot.Active;
+            }
         }
 
         private void SetTargetPosition()
         {
-            if (!_init) Init();
-            _targetPositions = Menu.Items.GetTargetPositions();           
-            _popUp = true;
+            _targetPositions = Menu.Items.GetTargetPositions();
+
+            if (_popupCoroutine != null) StopCoroutine(_popupCoroutine);
+            _popupCoroutine = StartCoroutine(AnimatePopupRoutine(_targetPositions));
         }
 
-        //private IEnumerator SetDelayedTargetPositionsRoutine()
-        //{
-        //    float delay = _lerpPopupTime / Menu.Items.Count;
-        //    for (int i = 0; i < Menu.Items.Count; i++)
-        //    {
-        //       // _targetPositions[i] = Vector3.zero;
-        //        yield return new WaitForSecondsRealtime(delay);
-        //    }
-        //}
+        private IEnumerator AnimatePopupRoutine(Vector3[] target)
+        {
+            IsSlowing = false;
+            while (!IsSlowing)
+            {
+                for (int i = 0; i < Menu.Items.Count; i++)
+                {
+                    if (MoveUsing == Easing.NumericSpring)
+                    {
+                        _springToggling[i].Activate(ref _currentPositions[i], target[i]);
+                    }
+                    else //Easing.AnimationCurve
+                    {
+                        _animCurveToggling[i].Activate(ref _currentPositions[i], target[i]);
+                    }
+                }
+                yield return null;
+
+                if (MoveUsing == Easing.NumericSpring)
+                {
+                    IsSlowing = Array.TrueForAll(_springToggling, i => !i.Active);
+                }
+                else
+                {
+                    IsSlowing = Array.TrueForAll(_animCurveToggling, i => !i.Active);
+                }
+            }
+        }
+
 
         #region Debug
         [Button("Next")]

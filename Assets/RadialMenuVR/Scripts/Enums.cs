@@ -16,4 +16,10 @@ namespace Gustorvo.RadialMenu
         RotateMenu,
         RotateChosen
     }
+
+    public enum Easing
+    {
+        NumericSpring,
+        AnimationCurve
+    }
 }

@@ -78,7 +78,7 @@ namespace Gustorvo.RadialMenu
             if (index >= 0 && index <= ItemList.Count - 1)
                 item = ItemList[index];
             return item != null;
-        }
+        }     
         public Vector3[] GetTargetPositions()
         {
             if (Menu.Active)
@@ -93,6 +93,7 @@ namespace Gustorvo.RadialMenu
         }
         public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();
         public Vector3[] GetScales() => ItemList.ConvertAll(i => i.Scale).ToArray();
+        public Vector3[] GetPositions() => ItemList.ConvertAll(i => i.Position).ToArray();
         public bool TryRemoveItem(MenuItem itemToRemove, bool destroyGO = false)
         {
             // if (itemToRemove == null) itemToRemove = ItemList.LastOrDefault();
