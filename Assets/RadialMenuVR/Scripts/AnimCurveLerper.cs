@@ -51,7 +51,7 @@ namespace Gustorvo.RadialMenu
                 _target = targetValue;               
                 _journey = 0f;
             }
-            _journey = _journey + Time.deltaTime;
+            _journey += Time.deltaTime;
             _percent = Mathf.Clamp01(_journey / _duration);
             _curvePercent = _curve.Evaluate(_percent);
             _prevValue = curValue;

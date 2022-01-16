@@ -12,8 +12,8 @@ namespace Gustorvo.RadialMenu
     {
         [SerializeField, Range(1.1f, 2f), OnValueChanged("OnScaleFactorChanged")] float _upscaleSelectedFactor = 1.25f;
         [SerializeField, OnValueChanged("OnScaleFactorChanged"), Range(0f, 1f)] float _itemScaleFactor = 1f;
-        [SerializeField] float _animDuration;
-        [SerializeField] AnimationCurve _animCurve;
+        [SerializeField] float _animDuration = 0.5f;
+        [SerializeField, CurveRange(0, 0, 1, 1)] AnimationCurve _animCurve; // add defaults anim curve
         [SerializeField, ReadOnly] float _itemUniformScale = 0f;
         public Vector3 ItemsInitialScale { get; private set; } = Vector3.zero;
         public float ChosenUpscaleFactor => _upscaleSelectedFactor;
@@ -26,7 +26,7 @@ namespace Gustorvo.RadialMenu
                 return _menu;
             }
         }
-        private AnimCurveLerper _animCurveScaler;
+        private AnimCurveLerper[] _animCurveScaler;
         private RadialMenu _menu;
         private MenuMover _mover;
         private Coroutine _scaleCoroutine;
@@ -55,8 +55,13 @@ namespace Gustorvo.RadialMenu
 
         public void Init()
         {
-            _lerpedScales = new Vector3[Menu.Items.Count];
-            _animCurveScaler = new AnimCurveLerper(_animCurve, _animDuration);
+            int numOfItems = Menu.Items.Count;
+            _lerpedScales = new Vector3[numOfItems];
+            _animCurveScaler = new AnimCurveLerper[numOfItems];
+            for (int i = 0; i < numOfItems; i++)
+            {
+                _animCurveScaler[i] = new AnimCurveLerper(_animCurve, _animDuration);
+            }
         }
 
         public void InitScale()
@@ -96,28 +101,29 @@ namespace Gustorvo.RadialMenu
             }
         }
 
+        // increase selected/chosen item and decrease the rest of the menu items gradually as we rotate the menu
         private IEnumerator ScaleGraduallyRoutine()
         {
-            Vector3[] fromScale = Menu.Items.GetScales();
             Vector3[] toScale = Menu.Items.GetTargetScales();
             toScale[Menu.ChosenIndex] *= ChosenUpscaleFactor;
-            float t = 0f;
-            while (t != 1f)
+            bool areSlowing = false;
+            while (!areSlowing)
             {
-                t = _mover.GetInterpolator();
                 for (int i = 0; i < Menu.Items.Count; i++)
                 {
-                    //_animCurveScaler.Activate()
-                    _lerpedScales[i] = Vector3.Lerp(fromScale[i], toScale[i], t);
+                    _animCurveScaler[i].Activate(ref _lerpedScales[i], toScale[i]);
                 }
-                   Menu.Items.SetScales(_lerpedScales);
+                Menu.Items.SetScales(_lerpedScales);
+                areSlowing = Array.TrueForAll(_animCurveScaler, i => !i.Active);
                 yield return null;
             }
         }
 
+        // toggle scale (between either "0" or "normal initial")
+        // the scale is lerped, whete the interpolator (t) is calculated by the current radius of the menu circle
+        // the smaller the radius, the smaller the scale (and vice versa)
         private IEnumerator ToggleVisibilityRoutine()
         {
-            // toggle scale (between either "0" or "normal initial")
             float a = 0f;
             if (Menu.Items.TryGetItem(0, out MenuItem item))
                 a = item.Position.y; // start
@@ -138,7 +144,7 @@ namespace Gustorvo.RadialMenu
                 }
                 Menu.Items.SetScales(_lerpedScales);
                 // scele indicator
-                Menu.Indicator.SetScales(ItemsInitialScale);
+                Menu.Indicator.SetScales(_lerpedScales[0]);
                 yield return null;
             }
         }
