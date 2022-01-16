@@ -82,8 +82,8 @@ namespace Gustorvo.RadialMenu
                 _animCurveToggling[i] = new AnimCurveLerper(_linAnimationCurve, _popupDuration);
 
                 // init numeric springs
-                float damping = _randomizeSpringValues ? Randomize(_angDamping, _randomDelta) : _angDamping;
-                float frequency = _randomizeSpringValues ? Randomize(_angFrequency, _randomDelta) : _angFrequency;
+                float damping = _randomizeSpringValues ? Randomize(_linDamping, _randomDelta) : _linDamping;
+                float frequency = _randomizeSpringValues ? Randomize(_linFrequency, _randomDelta) : _linFrequency;
                 _springToggling[i] = new NumericSpring(damping, frequency);
             }          
         }
