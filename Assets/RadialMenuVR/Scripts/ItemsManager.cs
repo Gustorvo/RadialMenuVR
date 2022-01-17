@@ -41,7 +41,7 @@ namespace Gustorvo.RadialMenu
                 var child = transform.GetChild(i);
                 if (child.TryGetComponent(out MenuItem newItem) && !ItemList.Contains(newItem))
                 {
-                    newItem.Index = i;
+                    newItem.Init(i, i.ToString());
                     ItemList.Add(newItem);
                 }
             }

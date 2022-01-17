@@ -69,9 +69,12 @@ namespace Gustorvo.RadialMenu
         private bool _active = false;
         private int _prevIndex;
         private MenuScaler _scaler;
+        private ChosenText _text;
 
         private void Awake()
         {
+            _text = GetComponentInChildren<ChosenText>();
+
             if (_menuAnchorToFollow == null)
             {
                 _menuAnchorToFollow = transform;
