@@ -12,6 +12,7 @@ namespace Gustorvo.RadialMenu
         private Vector3[] InitialScales { get; set; }
         public int Count => ItemList.Count;
         public float DeltaDistance => Vector3.Distance(InitialPositions[0], InitialPositions[1]);
+        public float DistToCenter => Vector3.Distance(ItemList[0].Position, Vector3.zero);
         public RadialMenu Menu
         {
             get
