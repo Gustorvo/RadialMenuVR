@@ -12,6 +12,7 @@ namespace Gustorvo.RadialMenu
         private Vector3[] InitialScales { get; set; }
         public int Count => ItemList.Count;
         public float DeltaDistance => Vector3.Distance(InitialPositions[0], InitialPositions[1]);
+        public float DistToCenter => Vector3.Distance(ItemList[0].Position, Vector3.zero);
         public RadialMenu Menu
         {
             get
@@ -68,7 +69,8 @@ namespace Gustorvo.RadialMenu
         public void InitScales()
         {
             Menu.Scaler.InitScale();
-            InitialScales = Enumerable.Repeat(Menu.Scaler.ItemsInitialScale, Count).ToArray();
+           InitialScales = Enumerable.Repeat(Menu.Scaler.ItemsInitialScale, Count).ToArray();
+          
             //InitialScales[Menu.ChosenIndex] *= Menu.Scaler.ChosenUpscaleFactor;
         }
 
@@ -78,7 +80,7 @@ namespace Gustorvo.RadialMenu
             if (index >= 0 && index <= ItemList.Count - 1)
                 item = ItemList[index];
             return item != null;
-        }     
+        }
         public Vector3[] GetTargetPositions()
         {
             if (Menu.Active)
@@ -109,7 +111,8 @@ namespace Gustorvo.RadialMenu
             }
             return false;
         }
-        public void SetForwardVector(Vector3 forward) => ItemList.ForEach(i => i.transform.forward = forward);
+        public void SetChildrenForwardVector(Vector3 forward) { ItemList.ForEach(i => i.transform.forward = forward); }
+        public void SetParentForwarddVector(Vector3 forward) =>  transform.forward = forward; 
         public void SetPositions(Vector3 position) => ItemList.ForEach(i => i.transform.localPosition = position);
         public void SetPositions(Vector3[] positions) => ItemList.ForEach(i => i.transform.localPosition = positions[i.Index]);
         public void SetRotation(Quaternion rotation) => transform.rotation = rotation;

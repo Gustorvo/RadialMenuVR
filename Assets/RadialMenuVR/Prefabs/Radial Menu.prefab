@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3951279677410888627}
+  - component: {fileID: 1698370029}
   m_Layer: 0
   m_Name: Chosen Text
   m_TagString: Untagged
@@ -24,13 +25,85 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2286172677785734226}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.313, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3681225980100346884}
   m_Father: {fileID: 7560167499516101220}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1698370029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2286172677785734226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e27f9e57955fcf45a52a755253d7dfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
+  _scaleSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
 --- !u!1 &4886707238426917795
 GameObject:
   m_ObjectHideFlags: 0
@@ -150,7 +223,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5278192286850599330}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: 0.008726536, w: 0.9999619}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -266,6 +339,36 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
+--- !u!1 &5660084419466544370
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8596805036060505483}
+  m_Layer: 0
+  m_Name: Attachments
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8596805036060505483
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5660084419466544370}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7560167499516101220}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6485023898049751606
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +393,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6485023898049751606}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: 0.008726536, w: 0.9999619}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -311,6 +414,66 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _icon: {fileID: 2413744870794411349}
+  _moveSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
+  _scaleSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
 --- !u!1 &7185158987025810765
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,8 +499,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7185158987025810765}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.09785001, z: 0}
-  m_LocalScale: {x: 0.1339, y: 0.1339, z: 0.1339}
+  m_LocalPosition: {x: 0, y: 0.26209512, z: 0}
+  m_LocalScale: {x: 0.0673, y: 0.0673, z: 0.0673}
   m_Children: []
   m_Father: {fileID: 5493507673898989503}
   m_RootOrder: 0
@@ -509,6 +672,7 @@ Transform:
   - {fileID: 3951279677410888627}
   - {fileID: 5493507673898989503}
   - {fileID: 9213030890333058286}
+  - {fileID: 8596805036060505483}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -541,13 +705,14 @@ MonoBehaviour:
   _chosenIndicator: {fileID: 961310815}
   _menuItemsPrefab: {fileID: 7018532599971761334, guid: 55dac42269f7ab447af494dd0fc768ac, type: 3}
   _menuAnchorToFollow: {fileID: 0}
-  _radiusAffectsScale: 1
-  _menuRadius: 0.103
-  _rotationOffset: 0
-  _indicatorOffset: 0
+  _radiusAffectsScale: 0
+  _textRotatesWithIndicator: 0
+  _menuRadius: 0.337
+  _rotationOffset: 1
+  _indicatorOffset: 0.129
   _type: 0
   _chosenOffset: 0
-  _rotationType: 0
+  _rotationType: 1
   <ChosenIndex>k__BackingField: 0
 --- !u!114 &7560167499516101222
 MonoBehaviour:
@@ -561,34 +726,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a6d03bad009b3b4f8ac68a61c15c55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _upscaleSelectedFactor: 1.856
-  _itemScaleFactor: 0.65
-  _animDuration: 0.5
-  _animCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _itemUniformScale: 0.1339
+  _upscaleSelectedFactor: 2
+  _itemScaleFactor: 0.673
+  _itemUniformScale: 0.0673
+  _scaleSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
 --- !u!114 &7560167499516101224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -601,75 +771,66 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9631a3b8f74087498f4e824d20c69e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RotateUsing: 0
-  _angDamping: 0.3
-  _angFrequency: 6
-  _angAnimationCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _rotDuration: 0.75
-  _angVelocity: 0
-  result: 0.15915494
-  MoveUsing: 0
-  _linDamping: 0.23
-  _linFrequency: 6
-  _randomizeSpringValues: 0
-  _randomDelta: 0.1
-  _linAnimationCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.5742322
-      value: 1
-      inSlope: 1.1860347
-      outSlope: 1.1860347
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _popupDuration: 2.93
+  _moveSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
+  _rotateSettings:
+    <AnimateUsing>k__BackingField: 0
+    <Curve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <Duration>k__BackingField: 0.5
+    <Damping>k__BackingField: 0.25
+    <Frequency>k__BackingField: 4
+    <AllowSnapping>k__BackingField: 1
 --- !u!1 &7560167500024231028
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,8 +856,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167500024231028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0000000090045456, y: -0.103, z: 0}
-  m_LocalScale: {x: 0.1339, y: 0.1339, z: 0.1339}
+  m_LocalPosition: {x: -0.000000029461477, y: -0.337, z: 0}
+  m_LocalScale: {x: 0.0673, y: 0.0673, z: 0.0673}
   m_Children:
   - {fileID: 7560167501357760601}
   m_Father: {fileID: 9213030890333058286}
@@ -740,8 +901,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167501164814390}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.103, z: 0}
-  m_LocalScale: {x: 0.24851839, y: 0.24851839, z: 0.24851839}
+  m_LocalPosition: {x: 0, y: 0.337, z: 0}
+  m_LocalScale: {x: 0.1346, y: 0.1346, z: 0.1346}
   m_Children:
   - {fileID: 7560167499385239488}
   - {fileID: 7263129511155338173}

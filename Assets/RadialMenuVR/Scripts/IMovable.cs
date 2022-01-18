@@ -11,6 +11,6 @@ namespace Gustorvo.RadialMenu
         public void SetScales(Vector3[] scales);
         public void SetScales(Vector3 scale);
         public void SetRotation(Quaternion rotation);
-        public void SetForwardVector(Vector3 forward);        
+        public void SetChildrenForwardVector(Vector3 forward);        
     }
 }

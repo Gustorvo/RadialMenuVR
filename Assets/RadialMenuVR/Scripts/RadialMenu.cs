@@ -12,19 +12,27 @@ namespace Gustorvo.RadialMenu
     /// (in this case around a tracked hand controller)
     /// </summary>
     public class RadialMenu : MonoBehaviour
-    {
-        [SerializeField] ItemsManager _items;
+    {        
+        //TODO: fix attachements
+        //TODO: fix runtime menu rotation type change
+        //TODO: fix snapping thresthold issue
+        //TODO: fix animator velocity issue
+        //TODO: fix numeric spring Vector3 overload method
+        //TODO: update README
+
+        [field: SerializeField] public ItemsManager Items { get; private set; }
         [SerializeField] private ChosenIndicator _chosenIndicator;
         // [SerializeField] Transform _items;
         [SerializeField] MenuItem _menuItemsPrefab;
         [SerializeField] Transform _menuAnchorToFollow; // menu will move after the anchor
-        [SerializeField, OnValueChanged("OnRadiusChangedCallback")] bool _radiusAffectsScale = true;
-        [SerializeField, OnValueChanged("OnRadiusChangedCallback"), Range(minRadius, maxRadius)] float _menuRadius = 0.085f;
-        [SerializeField, OnValueChanged("OnOffsetChangedCallback"), Range(-180, 180)] int _rotationOffset = 0;
-        [SerializeField, OnValueChanged("OnIndicatorOfsetChangedCallback"), Range(0f, 1f)] private float _indicatorOffset = 0.5f;  // distance from the center to the chosen
-        [SerializeField, OnValueChanged("OnMenuTypeChangedCallback")] MenuType _type = MenuType.FullCircle;
-        [SerializeField, OnValueChanged("OnChosenOffsetChangedCallback")] ChosenOffset _chosenOffset = ChosenOffset.Start;
-        [SerializeField] RotationType _rotationType = RotationType.RotateMenu;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback")] bool _radiusAffectsScale = true;
+        [SerializeField] bool _textRotatesWithIndicator = false;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(minRadius, maxRadius)] float _menuRadius = 0.085f;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(-180, 180), EnableIf("IsRunningInEditor")] int _rotationOffset = 0;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(0f, 1f)] private float _indicatorOffset = 0.5f;  // distance from the center to the chosen
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback")] MenuCircleType _circleType = MenuCircleType.FullCircle;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), EnableIf("IsRunningInEditor")] ChosenOffset _chosenStartsOn = ChosenOffset.Beginning;
+        [field: SerializeField, EnableIf("IsRunningInEditor")] public MenuRotationType RotationType { get; private set; } = MenuRotationType.RotateMenu;
 
         public const float minRadius = .1f;
         public const float maxRadius = 1f;
@@ -34,14 +42,16 @@ namespace Gustorvo.RadialMenu
         public event Action<int> OnStep; // direction (step) of chosen relative to the prev one: 1/-1 
         public event Action OnToggleVisibility; // get called when menu activates/deactivates
         public event Action OnMenuRebuild; // get called when any of the menu properties has has changed (radius, offset, scale etc)
+        //public MenuRotationType RotationType => _rotationType;
+        public float IndicatorOffset => _indicatorOffset;
         public Transform AnchorToFollow => _menuAnchorToFollow;
-        public ItemsManager Items => _items;
+        //  public ItemsManager Items => _items;
         public bool RadiusAffectsScale => _radiusAffectsScale;
         public float Radius => _menuRadius;
         public float ItemsDelataDistDeg => Items.Count > 0 ? SpaceDegrees / Items.Count : 0f; // angular distance (in degrees) between each elements in the menu    
         public float SpaceDegrees => SpaceRad * Mathf.Rad2Deg;
-        public float SpaceRad => _type == MenuType.FullCircle ? Mathf.PI * 2f : Mathf.PI;
-       
+        public float SpaceRad => _circleType == MenuCircleType.FullCircle ? Mathf.PI * 2f : Mathf.PI;
+
         /// <summary>
         /// index of currently chosen item in menu
         /// </summary>
@@ -55,7 +65,15 @@ namespace Gustorvo.RadialMenu
                 return _scaler;
             }
         }
-     
+        public ChosenText Text
+        {
+            get
+            {
+                if (_text == null) _text = GetComponentInChildren<ChosenText>();
+                return _text;
+            }
+        }
+
         public ChosenIndicator Indicator => _chosenIndicator;
         public bool Active
         {
@@ -63,7 +81,7 @@ namespace Gustorvo.RadialMenu
             private set => _active = value;
         }
         public Quaternion FollowRotation => _menuAnchorToFollow.rotation; // anchor rotation    
-        public Quaternion RotaionOffset { get; private set; } = Quaternion.identity;
+        public Quaternion RotationOffset { get; private set; } = Quaternion.identity;
         public bool Initialized { get; private set; } = false;
         public bool IsRunningInEditor => Application.isEditor && !Application.isPlaying;
         private bool _active = false;
@@ -73,8 +91,6 @@ namespace Gustorvo.RadialMenu
 
         private void Awake()
         {
-            _text = GetComponentInChildren<ChosenText>();
-
             if (_menuAnchorToFollow == null)
             {
                 _menuAnchorToFollow = transform;
@@ -91,48 +107,27 @@ namespace Gustorvo.RadialMenu
         }
         private void InitChosen()
         {
-            int chosen =
-                             _chosenOffset == ChosenOffset.Middle ? Items.Count / 2 : // middle
-                            _chosenOffset == ChosenOffset.End ? Items.Count - 1 :     // end
-                            0;                                                           // start
+            if (!IsRunningInEditor) return;
 
+            int chosen =
+                             _chosenStartsOn == ChosenOffset.Middle ? Items.Count / 2 : // middle
+                            _chosenStartsOn == ChosenOffset.End ? Items.Count - 1 :     // end
+                            0;                                                           // start
+            
             ChosenIndex = chosen;
         }
 
         private void InitRotationOffset()
         {
-            RotaionOffset = Quaternion.AngleAxis(_rotationOffset, Vector3.forward);
-            Items.SetRotation(RotaionOffset);
-            Indicator.SetRotation(RotaionOffset);
+            RotationOffset = Quaternion.AngleAxis(_rotationOffset, Vector3.forward);
+            Items.SetRotation(RotationOffset);
+            Indicator.SetRotation(RotationOffset);
         }
-        internal void SetPosition()
-        {
-            transform.position = AnchorToFollow.position;
-            //Items.SetPosition(AnchorToFollow.position);
-            //Indicator.SetPosition(AnchorToFollow.position);
-        }
-        internal void SetRotation(Quaternion newRotation)
-        {
-            newRotation = FollowRotation * newRotation;
-
-            if (_rotationType == RotationType.RotateMenu)
-            {
-                Items.SetRotation(newRotation);
-                Indicator.SetRotation(FollowRotation * RotaionOffset);
-            }
-            else
-            {
-                Indicator.SetRotation(newRotation);
-                Items.SetRotation(FollowRotation * RotaionOffset);
-            }
-            Indicator.SetForwardVector(AnchorToFollow.forward);
-        }
-
 
         [Button(enabledMode: EButtonEnableMode.Editor)]
         private void CreateItem()
         {
-            Instantiate(_menuItemsPrefab, _items.transform);
+            Instantiate(_menuItemsPrefab, Items.transform);
             Rebuild();
         }
         [Button(enabledMode: EButtonEnableMode.Editor)]
@@ -147,7 +142,7 @@ namespace Gustorvo.RadialMenu
             else Debug.LogWarning("Can't remove since there should be at least 2 items in the menu (for it to work)!");
         }
 
-        private void Rebuild()
+        public void Rebuild()
         {
             Init();
             OnMenuRebuild?.Invoke();
@@ -155,23 +150,9 @@ namespace Gustorvo.RadialMenu
             if (IsRunningInEditor)
             {
                 Items.SetPositions(Items.GetInitialPositions());
-                Scaler.OnScaleFactorChanged();
-                InitIndicatorPositionAndScale();
+                Scaler.Scale();
+                Indicator.InitPositionAndScale();
             }
-        }
-
-        // move over this method to ChosenIndicator.cs
-        public void InitIndicatorPositionAndScale()
-        {
-            float offset = 1.5f;
-            float itemScale = Active ? Scaler.UniformScale : 0f;
-            Vector3 chosenInitialPos = Items.GetInitialPositions()[ChosenIndex];
-            Vector3 dirToCenter = Vector3.Normalize(Vector3.zero - chosenInitialPos);
-            Vector3 a = chosenInitialPos + dirToCenter * itemScale * offset;
-            Vector3 b = chosenInitialPos - dirToCenter * itemScale * offset;
-            Vector3 newPos = Vector3.Lerp(a, b, _indicatorOffset);
-            Indicator.SetPositions(newPos);
-            Indicator.SetScales(Scaler.ItemsInitialScale);
         }
 
         private IEnumerator Start()
@@ -209,7 +190,7 @@ namespace Gustorvo.RadialMenu
         }
         private int SetChosenIndex(int step)
         {
-            if (_type == MenuType.HalfCircle)
+            if (_circleType == MenuCircleType.HalfCircle)
             {
                 // don't do circular loop, but stop when on last/first element
                 ChosenIndex = Mathf.Clamp(ChosenIndex + step, 0, Items.Count - 1);
@@ -259,8 +240,9 @@ namespace Gustorvo.RadialMenu
 
         private void InvokeMenuChange(int step)
         {
-            if (_rotationType == RotationType.RotateChosen)
-                // invert step since we're rotating 1 item, which is opposite of rotating all items in a circle
+            if (RotationType == MenuRotationType.RotateIndicator)
+                // invert the step (and hence the direction),
+                // which is opposite of rotating all items in a circle
                 step *= -1;
             OnStep?.Invoke(step);
             if (Items.TryGetItem(ChosenIndex, out MenuItem item))
@@ -271,26 +253,10 @@ namespace Gustorvo.RadialMenu
         private bool IsFirst(int index) => index == 0;
 
         #region Callbacks
-        private void OnRadiusChangedCallback()
+        private void OnSettingsChangedCallback()
         {
             Rebuild();
-        }
-        private void OnMenuTypeChangedCallback()
-        {
-            Rebuild();
-        }
-        private void OnOffsetChangedCallback()
-        {
-            Init();
-        }
-        private void OnChosenOffsetChangedCallback()
-        {
-            Rebuild();
-        }
-        private void OnIndicatorOfsetChangedCallback()
-        {
-            Rebuild();
-        }
+        }      
         #endregion // end callbacks
     }
 }

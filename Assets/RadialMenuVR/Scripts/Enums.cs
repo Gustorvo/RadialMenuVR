@@ -1,20 +1,20 @@
 namespace Gustorvo.RadialMenu
 {
-    public enum MenuType
+    public enum MenuCircleType
     {
         FullCircle,
         HalfCircle
     }
     public enum ChosenOffset
     {
-        Start,
+        Beginning,
         Middle,
         End
     }
-    public enum RotationType
+    public enum MenuRotationType
     {
         RotateMenu,
-        RotateChosen
+        RotateIndicator
     }
 
     public enum Easing
