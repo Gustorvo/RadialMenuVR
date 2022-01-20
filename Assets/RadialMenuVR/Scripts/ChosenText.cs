@@ -1,46 +1,27 @@
-using NaughtyAttributes;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ChosenText : MonoBehaviour
+    public class ChosenText : Attachment
     {
-        [SerializeField] AnimatorSettings _moveSettings;
-        [SerializeField] AnimatorSettings _scaleSettings;
-
+        [SerializeField] Transform _textTransform;
         private TextMesh _text;
-        private RadialMenu _menu;
-        private IAnimator _moveAnimator, _scaleAnimator;
         private Vector3 _initPos, _initScale;
         private Vector3 _curPos, _curScale;
         private Vector3 _targetPos, _targetScale;
 
-        public RadialMenu Menu
-        {
-            get
-            {
-                if (_menu == null) _menu = GetComponentInParent<RadialMenu>();
-                return _menu;
-            }
-        }
 
-        private void Awake()
+        private new void Awake()
         {
+            base.Awake();
             Menu.OnItemChosen -= SetItemText;
             Menu.OnItemChosen += SetItemText;
-            Menu.OnToggleVisibility -= ToggleVidibility;
-            Menu.OnToggleVisibility += ToggleVidibility;
+            Menu.OnToggleVisibility -= ToggleTargets;
+            Menu.OnToggleVisibility += ToggleTargets;
             _text = GetComponentInChildren<TextMesh>();
 
-            bool springMovement = _moveSettings.AnimateUsing == Easing.NumericSpring;
-            bool springScale = _scaleSettings.AnimateUsing == Easing.NumericSpring;
-            _scaleAnimator = springScale ? (IAnimator)new NumericSpring(_scaleSettings) : (IAnimator)new AnimCurveLerper(_scaleSettings);
-            _moveAnimator = springMovement ? (IAnimator)new NumericSpring(_moveSettings) : (IAnimator)new AnimCurveLerper(_moveSettings);
-            _initPos = _text.transform.localPosition;
-            _initScale = _text.transform.localScale;
+            _initPos = _textTransform.localPosition;
+            _initScale = _textTransform.localScale;
         }
 
         private void SetItemText(MenuItem item)
@@ -48,12 +29,7 @@ namespace Gustorvo.RadialMenu
             _text.text = item.Text;
         }
 
-        private void Update()
-        {
-            transform.forward = Menu.AnchorToFollow.forward;
-        }
-
-        public void ToggleVidibility()
+        private void ToggleTargets()
         {
             if (Menu.Active)
             {
@@ -64,47 +40,28 @@ namespace Gustorvo.RadialMenu
             {
                 _targetPos = Vector3.zero;
                 _targetScale = Vector3.zero;
-
             }
-            StopAllCoroutines();
-            StartCoroutine(ToggleVisibilityRoutine());
         }
 
-        private IEnumerator ToggleVisibilityRoutine()
+        internal override void Animate()
         {
-            bool active = true;
-            while (active)
+            if (_move)
             {
-                _scaleAnimator.Animate(ref _curScale, _targetScale);
-                _moveAnimator.Animate(ref _curPos, _targetPos);
-                _text.transform.localPosition = _curPos;
-                _text.transform.localScale = _curScale;
-                yield return null;
-                active = _moveAnimator.Active || _scaleAnimator.Active;
+                MoveAnimator.Animate(ref _curPos, _targetPos);
+                _textTransform.localPosition = _curPos;
             }
-        }
+            if (_scale)
+            {
+                ScaleAnimator.Animate(ref _curScale, _targetScale);
+                _textTransform.localScale = _curScale;
+            }
 
+            _textTransform.forward = Menu.AnchorToFollow.forward;
+        }
         private void OnDestroy()
         {
             Menu.OnItemChosen -= SetItemText;
-            Menu.OnToggleVisibility -= ToggleVidibility;
+            Menu.OnToggleVisibility -= ToggleTargets;
         }
-
-        public void SetRotation(Quaternion rotation) => transform.rotation = rotation;
-
-        //internal override void Move(Vector3 position)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //internal override void Rotate(Quaternion rotation)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //internal override void Scale(Vector3 scale)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
