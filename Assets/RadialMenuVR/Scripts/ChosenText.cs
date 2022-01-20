@@ -5,10 +5,24 @@ namespace Gustorvo.RadialMenu
     public class ChosenText : Attachment
     {
         [SerializeField] Transform _textTransform;
+        [SerializeField] bool _textRotatesWithIndicator;
+        [SerializeField] bool _textScalesWithRadius;
         private TextMesh _text;
-        private Vector3 _initPos, _initScale;
-        private Vector3 _curPos, _curScale;
-        private Vector3 _targetPos, _targetScale;
+        private Vector3 _initialPosition, _initialScale;
+        private Vector3 _currentPosition, _currentScale;
+        private float _distToOuterCircle;
+        private Vector3 _targetPosition
+        {
+            get
+            {
+                Vector3 pos = Menu.Active ? _initialPosition : Vector3.zero;
+                if (_textScalesWithRadius)
+                    pos = pos +  _dirToCenter * (_distToOuterCircle);
+                return pos;
+            }
+        }
+        private Vector3 _targetScale => Menu.Active ? _initialScale : Vector3.zero;
+        private Vector3 _dirToCenter => Vector3.Normalize(Vector3.zero - _textTransform.localPosition);
 
 
         private new void Awake()
@@ -16,12 +30,17 @@ namespace Gustorvo.RadialMenu
             base.Awake();
             Menu.OnItemChosen -= SetItemText;
             Menu.OnItemChosen += SetItemText;
-            Menu.OnToggleVisibility -= ToggleTargets;
-            Menu.OnToggleVisibility += ToggleTargets;
-            _text = GetComponentInChildren<TextMesh>();
 
-            _initPos = _textTransform.localPosition;
-            _initScale = _textTransform.localScale;
+            _text = GetComponentInChildren<TextMesh>();
+            _initialPosition = _textTransform.localPosition;
+            _initialScale = _textTransform.localScale;
+            _distToOuterCircle = Vector3.Distance(Vector3.zero, _textTransform.localPosition) - Menu.Radius;
+        }
+
+        private void Update()
+        {
+            if (Menu.RotationType == MenuRotationType.RotateIndicator && _textRotatesWithIndicator)
+                transform.localRotation = Menu.Indicator.transform.localRotation * Menu.RotationOffset;
         }
 
         private void SetItemText(MenuItem item)
@@ -29,31 +48,17 @@ namespace Gustorvo.RadialMenu
             _text.text = item.Text;
         }
 
-        private void ToggleTargets()
-        {
-            if (Menu.Active)
-            {
-                _targetPos = _initPos;
-                _targetScale = _initScale;
-            }
-            else
-            {
-                _targetPos = Vector3.zero;
-                _targetScale = Vector3.zero;
-            }
-        }
-
         internal override void Animate()
         {
             if (_move)
             {
-                MoveAnimator.Animate(ref _curPos, _targetPos);
-                _textTransform.localPosition = _curPos;
+                MoveAnimator.Animate(ref _currentPosition, _targetPosition);
+                _textTransform.localPosition = _currentPosition;
             }
             if (_scale)
             {
-                ScaleAnimator.Animate(ref _curScale, _targetScale);
-                _textTransform.localScale = _curScale;
+                ScaleAnimator.Animate(ref _currentScale, _targetScale);
+                _textTransform.localScale = _currentScale;
             }
 
             _textTransform.forward = Menu.AnchorToFollow.forward;
@@ -61,7 +66,6 @@ namespace Gustorvo.RadialMenu
         private void OnDestroy()
         {
             Menu.OnItemChosen -= SetItemText;
-            Menu.OnToggleVisibility -= ToggleTargets;
         }
     }
 }
