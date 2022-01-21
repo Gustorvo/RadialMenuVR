@@ -16,7 +16,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField, OnValueChanged("OnSettingsChangedCallback")] MenuCircleType _circleType = MenuCircleType.FullCircle;
         [SerializeField, OnValueChanged("OnSettingsChangedCallback"), EnableIf("InEditMode")] ChosenOffset _chosenStartsOn = ChosenOffset.Beginning;
         [SerializeField, OnValueChanged("OnSettingsChangedCallback"), EnableIf("InEditMode"), Range(-180, 180)] public int _rotationOffset = 0;
-        [field: SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(minRadius, maxRadius)] public float Radius { get; private set; } = minRadius;
+        [field: SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(minRadius, maxRadius)] public float Radius { get; internal set; } = minRadius;
         [field: SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(0f, 1f)] public float IndicatorPosition { get; private set; } = 0.5f;// position of the indicator relative to the center
         [field: SerializeField, EnableIf("InEditMode")] public MenuRotationType RotationType { get; private set; } = MenuRotationType.RotateMenu;
         [field: SerializeField] public ItemsManager Items { get; private set; }
