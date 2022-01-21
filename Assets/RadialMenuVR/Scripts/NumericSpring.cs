@@ -53,7 +53,7 @@ namespace Gustorvo.RadialMenu
             //}
 
             float damping = removeOscillation ? 1f : _settings.Damping;
-            float frequency = doubleFrequency ? _settings.Frequency * 2f : _settings.Frequency;
+            float frequency = doubleFrequency ? _settings.Frequency * 2f * Mathf.PI : _settings.Frequency * Mathf.PI;
             float f = 1.0f + 2.0f * Time.deltaTime * damping * frequency;
             float oo = frequency * frequency;
             float hoo = Time.deltaTime * oo;
