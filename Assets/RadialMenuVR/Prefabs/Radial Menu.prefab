@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2286172677785734226}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.313, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3681225980100346884}
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e27f9e57955fcf45a52a755253d7dfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSettings:
+  <MoveSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
       serializedVersion: 2
@@ -71,10 +71,10 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
-  _scaleSettings:
+    <Damping>k__BackingField: 0.45
+    <Frequency>k__BackingField: 8
+    <AllowSnapping>k__BackingField: 0
+  <ScaleSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
       serializedVersion: 2
@@ -101,9 +101,15 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
+    <Damping>k__BackingField: 0.75
+    <Frequency>k__BackingField: 12
+    <AllowSnapping>k__BackingField: 0
+  _move: 1
+  _scale: 1
+  _textTransform: {fileID: 3681225980100346884}
+  _textRotatesWithIndicator: 1
+  _textScalesWithRadius: 1
+  _textMovesWithRadius: 1
 --- !u!1 &4886707238426917795
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,8 +136,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4886707238426917795}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.057717595, y: 0.057717595, z: 0.057717595}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 3951279677410888627}
   m_RootOrder: 0
@@ -187,9 +193,9 @@ TextMesh:
   m_GameObject: {fileID: 4886707238426917795}
   m_Text: Item text
   m_OffsetZ: 0
-  m_CharacterSize: 0.2
+  m_CharacterSize: 0.05
   m_LineSpacing: 1
-  m_Anchor: 7
+  m_Anchor: 4
   m_Alignment: 0
   m_TabSize: 4
   m_FontSize: 100
@@ -223,7 +229,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5278192286850599330}
-  m_LocalRotation: {x: -0, y: -0, z: 0.008726536, w: 0.9999619}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -339,36 +345,6 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
---- !u!1 &5660084419466544370
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8596805036060505483}
-  m_Layer: 0
-  m_Name: Attachments
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8596805036060505483
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5660084419466544370}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 7560167499516101220}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6485023898049751606
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,7 +369,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6485023898049751606}
-  m_LocalRotation: {x: -0, y: -0, z: 0.008726536, w: 0.9999619}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -413,8 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6249230d2c401904594974010d166834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _icon: {fileID: 2413744870794411349}
-  _moveSettings:
+  <MoveSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
       serializedVersion: 2
@@ -441,10 +416,10 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
-  _scaleSettings:
+    <Damping>k__BackingField: 0.45
+    <Frequency>k__BackingField: 8
+    <AllowSnapping>k__BackingField: 0
+  <ScaleSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
       serializedVersion: 2
@@ -471,9 +446,12 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
+    <Damping>k__BackingField: 0.75
+    <Frequency>k__BackingField: 10
+    <AllowSnapping>k__BackingField: 0
+  _move: 1
+  _scale: 1
+  _iconTransform: {fileID: 2413744870794411349}
 --- !u!1 &7185158987025810765
 GameObject:
   m_ObjectHideFlags: 0
@@ -499,8 +477,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7185158987025810765}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.26209512, z: 0}
-  m_LocalScale: {x: 0.0673, y: 0.0673, z: 0.0673}
+  m_LocalPosition: {x: 0, y: 0.073332004, z: 0}
+  m_LocalScale: {x: 0.1328, y: 0.1328, z: 0.1328}
   m_Children: []
   m_Father: {fileID: 5493507673898989503}
   m_RootOrder: 0
@@ -546,7 +524,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 5ca38f46fb0ec0842bb1308f91141f57, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.30859268, g: 0.6320754, b: 0.2951673, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
@@ -651,6 +629,7 @@ GameObject:
   - component: {fileID: 7560167499516101221}
   - component: {fileID: 7560167499516101222}
   - component: {fileID: 7560167499516101224}
+  - component: {fileID: 1947982445}
   m_Layer: 0
   m_Name: Radial Menu
   m_TagString: Untagged
@@ -672,7 +651,6 @@ Transform:
   - {fileID: 3951279677410888627}
   - {fileID: 5493507673898989503}
   - {fileID: 9213030890333058286}
-  - {fileID: 8596805036060505483}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -701,18 +679,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 919ff413e5f0e8a42b424856d08346ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _items: {fileID: 2104357683}
-  _chosenIndicator: {fileID: 961310815}
   _menuItemsPrefab: {fileID: 7018532599971761334, guid: 55dac42269f7ab447af494dd0fc768ac, type: 3}
-  _menuAnchorToFollow: {fileID: 0}
-  _radiusAffectsScale: 0
-  _textRotatesWithIndicator: 0
-  _menuRadius: 0.337
-  _rotationOffset: 1
-  _indicatorOffset: 0.129
-  _type: 0
-  _chosenOffset: 0
-  _rotationType: 1
+  _circleType: 0
+  _chosenStartsOn: 0
+  _rotationOffset: 0
+  <Radius>k__BackingField: 0.1
+  <IndicatorPosition>k__BackingField: 0.315
+  <RotationType>k__BackingField: 0
+  <Items>k__BackingField: {fileID: 2104357683}
+  <AnchorToFollow>k__BackingField: {fileID: 0}
+  <RadiusAffectsScale>k__BackingField: 1
   <ChosenIndex>k__BackingField: 0
 --- !u!114 &7560167499516101222
 MonoBehaviour:
@@ -727,8 +703,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _upscaleSelectedFactor: 2
-  _itemScaleFactor: 0.673
-  _itemUniformScale: 0.0673
+  _itemScaleFactor: 0.664
+  _itemUniformScale: 0.1328
   _scaleSettings:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -737,17 +713,26 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 0
         value: 0
-        inSlope: 1
-        outSlope: 1
+        inSlope: 2
+        outSlope: 2
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
+        time: 0.5436274
+        value: 1.0914967
+        inSlope: 1.1528765
+        outSlope: 1.1528765
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
-        inSlope: 1
-        outSlope: 1
+        inSlope: 0
+        outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
@@ -755,10 +740,10 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
+    <Duration>k__BackingField: 0.35
+    <Damping>k__BackingField: 0.5
+    <Frequency>k__BackingField: 8
+    <AllowSnapping>k__BackingField: 0
 --- !u!114 &7560167499516101224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -779,17 +764,26 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 0
         value: 0
-        inSlope: 1
-        outSlope: 1
+        inSlope: 2
+        outSlope: 2
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
+        time: 0.5436274
+        value: 1.0914967
+        inSlope: 1.1528765
+        outSlope: 1.1528765
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
-        inSlope: 1
-        outSlope: 1
+        inSlope: 0
+        outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
@@ -797,10 +791,10 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
-    <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
+    <Duration>k__BackingField: 0.35
+    <Damping>k__BackingField: 0.45
+    <Frequency>k__BackingField: 12
+    <AllowSnapping>k__BackingField: 0
   _rotateSettings:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -809,17 +803,26 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 0
         value: 0
-        inSlope: 1
-        outSlope: 1
+        inSlope: 2
+        outSlope: 2
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
+        time: 0.5436274
+        value: 1.0914967
+        inSlope: 1.1528765
+        outSlope: 1.1528765
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
         time: 1
         value: 1
-        inSlope: 1
-        outSlope: 1
+        inSlope: 0
+        outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
@@ -827,10 +830,25 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    <Duration>k__BackingField: 0.5
-    <Damping>k__BackingField: 0.25
+    <Duration>k__BackingField: 0.35
+    <Damping>k__BackingField: 0.5
     <Frequency>k__BackingField: 4
-    <AllowSnapping>k__BackingField: 1
+    <AllowSnapping>k__BackingField: 0
+--- !u!114 &1947982445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7560167499516101225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 907e3409168c3244ea37e92ca1dea38a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _attachments:
+  - {fileID: 1698370029}
+  - {fileID: 961310815}
 --- !u!1 &7560167500024231028
 GameObject:
   m_ObjectHideFlags: 0
@@ -856,8 +874,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167500024231028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.000000029461477, y: -0.337, z: 0}
-  m_LocalScale: {x: 0.0673, y: 0.0673, z: 0.0673}
+  m_LocalPosition: {x: -0.000000008742278, y: -0.1, z: 0}
+  m_LocalScale: {x: 0.1328, y: 0.1328, z: 0.1328}
   m_Children:
   - {fileID: 7560167501357760601}
   m_Father: {fileID: 9213030890333058286}
@@ -901,8 +919,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167501164814390}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.337, z: 0}
-  m_LocalScale: {x: 0.1346, y: 0.1346, z: 0.1346}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0}
+  m_LocalScale: {x: 0.2656, y: 0.2656, z: 0.2656}
   m_Children:
   - {fileID: 7560167499385239488}
   - {fileID: 7263129511155338173}

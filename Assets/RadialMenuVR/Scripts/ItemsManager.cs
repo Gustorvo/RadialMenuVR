@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ItemsManager : MonoBehaviour, IMovable
+    public class ItemsManager : MonoBehaviour
     {
         public List<MenuItem> ItemList { get; private set; } = new List<MenuItem>();
         private Vector3[] InitialPositions { get; set; }
@@ -69,9 +69,7 @@ namespace Gustorvo.RadialMenu
         public void InitScales()
         {
             Menu.Scaler.InitScale();
-           InitialScales = Enumerable.Repeat(Menu.Scaler.ItemsInitialScale, Count).ToArray();
-          
-            //InitialScales[Menu.ChosenIndex] *= Menu.Scaler.ChosenUpscaleFactor;
+            InitialScales = Enumerable.Repeat(Menu.Scaler.ItemsInitialScale, Count).ToArray();
         }
 
         public bool TryGetItem(int index, out MenuItem item)
@@ -83,18 +81,17 @@ namespace Gustorvo.RadialMenu
         }
         public Vector3[] GetTargetPositions()
         {
-            if (Menu.Active)
+            if (Menu.IsActive)
                 return (Vector3[])InitialPositions.Clone(); // to enable
             return Enumerable.Repeat(Vector3.zero, Count).ToArray(); // to disable
         }
         public Vector3[] GetTargetScales()
         {
-            if (Menu.Active)
+            if (Menu.IsActive)
                 return (Vector3[])InitialScales.Clone(); // to enable
             return Enumerable.Repeat(Vector3.zero, Count).ToArray(); // to disable
         }
-        public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();
-        public Vector3[] GetScales() => ItemList.ConvertAll(i => i.Scale).ToArray();
+        public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();      
         public Vector3[] GetPositions() => ItemList.ConvertAll(i => i.Position).ToArray();
         public bool TryRemoveItem(MenuItem itemToRemove, bool destroyGO = false)
         {
@@ -110,9 +107,7 @@ namespace Gustorvo.RadialMenu
                 return true;
             }
             return false;
-        }
-        public void SetChildrenForwardVector(Vector3 forward) { ItemList.ForEach(i => i.transform.forward = forward); }
-        public void SetParentForwarddVector(Vector3 forward) =>  transform.forward = forward; 
+        }       
         public void SetPositions(Vector3 position) => ItemList.ForEach(i => i.transform.localPosition = position);
         public void SetPositions(Vector3[] positions) => ItemList.ForEach(i => i.transform.localPosition = positions[i.Index]);
         public void SetRotation(Quaternion rotation) => transform.rotation = rotation;

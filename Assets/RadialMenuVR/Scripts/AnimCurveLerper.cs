@@ -31,7 +31,7 @@ namespace Gustorvo.RadialMenu
             _settings = settings;         
         }
         
-        public void Animate(ref Vector3 curValue, Vector3 targetValue)
+        public void Animate(ref Vector3 curValue, Vector3 targetValue, bool removeOscillation = false, bool doubleFrequency = false)
         {
             if (targetValue != _targetVector3)
             {
@@ -46,7 +46,7 @@ namespace Gustorvo.RadialMenu
 
             curValue = Vector3.LerpUnclamped(_originVector3, _targetVector3, _curvePercent);
         }
-        public void Animate(ref float curValue, /*ref float velocity,*/ float targetValue)
+        public void Animate(ref float curValue, /*ref float velocity,*/ float targetValue, bool removeOscillation = false, bool doubleFrequency = false)
         {
             if (targetValue != _target)
             {

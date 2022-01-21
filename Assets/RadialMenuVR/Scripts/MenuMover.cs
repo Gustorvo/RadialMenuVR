@@ -9,8 +9,8 @@ namespace Gustorvo.RadialMenu
     public class MenuMover : MonoBehaviour
     {
         [SerializeField] AnimatorSettings _moveSettings;
-        [SerializeField] AnimatorSettings _rotateSettings; 
-       
+        [SerializeField] AnimatorSettings _rotateSettings;
+
         public bool IsRotating => _rotateAnimator.Active; //_angVelocity != 0f;
         public bool IsSlowing { get; private set; }
         public RadialMenu Menu
@@ -43,9 +43,9 @@ namespace Gustorvo.RadialMenu
         }
 
         private void Start()
-        {           
+        {
             Init();
-        }       
+        }
 
         public void Init()
         {
@@ -57,7 +57,7 @@ namespace Gustorvo.RadialMenu
             _targetAngleZ = _curAngleZ;
             //  _angVelocity = 0.0f;          
             bool springMovement = _moveSettings.AnimateUsing == Easing.NumericSpring;
-            bool springRotation = _rotateSettings.AnimateUsing  == Easing.NumericSpring;
+            bool springRotation = _rotateSettings.AnimateUsing == Easing.NumericSpring;
             _rotateAnimator = springRotation ? (IAnimator)new NumericSpring(_rotateSettings) : (IAnimator)new AnimCurveLerper(_rotateSettings);
 
             for (int i = 0; i < Menu.Items.Count; i++)
@@ -76,19 +76,18 @@ namespace Gustorvo.RadialMenu
             // --- move and rotate menu & indicator ---
             Quaternion newRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
             Quaternion lookForwardRot = Quaternion.LookRotation(Menu.AnchorToFollow.forward);
-            Menu.transform.rotation = lookForwardRot;            
+            Menu.transform.rotation = lookForwardRot;
             if (Menu.RotationType == MenuRotationType.RotateMenu)
             {
                 Menu.Items.SetRotation(lookForwardRot * newRot);
             }
             else // rotate indicator
-            {
-              //  if (_textRotatesWithIndicator) Text.SetRotation(lookForwardRot * newRotation);
+            {              
                 Menu.Indicator.SetRotation(lookForwardRot * newRot);
             }
-           
-            Menu.transform.position = Menu.AnchorToFollow.position;            
-        }        
+
+            Menu.transform.position = Menu.AnchorToFollow.position;
+        }
 
         /// <summary>
         /// Returns the interpolator (t) between current and target rotation angles on Z axis
@@ -101,50 +100,48 @@ namespace Gustorvo.RadialMenu
             // No need to stop the Coroutine if it's running.
             // animator will pick up the new target value automatically
             _step = step;
-            _targetAngleZ += Menu.ItemsDelataDistDeg * step;          
+            _targetAngleZ += Menu.ItemsDelataDistDeg * step;
             if (_rotateCoroutine == null)
                 _rotateCoroutine = StartCoroutine(AnimateRotationAngleRoutine());
         }
 
         private IEnumerator AnimateRotationAngleRoutine()
         {
-            bool active = true;
-            float time = 0f;
+            bool active = true;         
             while (active)
             {
-                _rotateAnimator.Animate(ref _curAngleZ, _targetAngleZ);
-                // _angVelocity = _rotateAnimator.Velocity;
-                time += Time.deltaTime;
+                if (Menu.IsActive) _rotateAnimator.Animate(ref _curAngleZ, _targetAngleZ);
+                else _rotateAnimator.Animate(ref _curAngleZ, _targetAngleZ, true, true); // make critically damped system when toggling off
+                // _angVelocity = _rotateAnimator.Velocity;              
                 yield return null;
                 active = _rotateAnimator.Active;
             }
-            _rotateCoroutine = null;
-            Debug.Log("time: " + time);
+            _rotateCoroutine = null;          
         }
 
         private void ToggleMenuItems()
         {
             _targetPositions = Menu.Items.GetTargetPositions();
-
-            if (_toggleCoroutine != null) StopCoroutine(_toggleCoroutine);           
+            if (_toggleCoroutine != null) StopCoroutine(_toggleCoroutine);
             _toggleCoroutine = StartCoroutine(ToggleAnimationRoutine(_targetPositions));
         }
 
         private IEnumerator ToggleAnimationRoutine(Vector3[] target)
         {
-            IsSlowing = false;       
+            IsSlowing = false;
             while (!IsSlowing)
             {
                 for (int i = 0; i < Menu.Items.Count; i++)
                 {
-                    _moveAnimator[i].Animate(ref _currentPositions[i], target[i]);
+                    if (Menu.IsActive) _moveAnimator[i].Animate(ref _currentPositions[i], target[i]);
+                    else _moveAnimator[i].Animate(ref _currentPositions[i], target[i], true, true); // make critically damped system when toggling off
                 }
                 Menu.Items.SetPositions(_currentPositions);
                 yield return null;
                 IsSlowing = Array.TrueForAll(_moveAnimator, i => !i.Active);
             }
             _toggleCoroutine = null;
-        }       
+        }
 
         #region Debug
         [Button("Next")]

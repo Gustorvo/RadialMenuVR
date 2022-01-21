@@ -11,8 +11,8 @@ namespace Gustorvo.RadialMenu
         private Vector3 _initialPosition, _initialScale;
         private Vector3 _currentPosition, _currentScale;
 
-        private Vector3 _targetPosition => Menu.Active ? _initialPosition : Vector3.zero;
-        private Vector3 _targetScale => Menu.Active ? _initialScale : Vector3.zero;
+        private Vector3 _targetPosition => Menu.IsActive ? _initialPosition : Vector3.zero;
+        private Vector3 _targetScale => Menu.IsActive ? _initialScale : Vector3.zero;
 
 
         private new void Awake()
@@ -20,7 +20,7 @@ namespace Gustorvo.RadialMenu
             base.Awake();
 
             Menu.OnMenuRebuild -= InitPositionAndScale;
-            Menu.OnMenuRebuild += InitPositionAndScale;          
+            Menu.OnMenuRebuild += InitPositionAndScale;
 
             _initialPosition = _iconTransform.localPosition;
             _initialScale = _iconTransform.localScale;
@@ -31,11 +31,10 @@ namespace Gustorvo.RadialMenu
         public void SetScale(Vector3 scale) => _iconTransform.localScale = scale;
 
         public void InitPositionAndScale()
-        {          
-            
-            Vector3 chosenPosition = Menu.transform.InverseTransformPoint(Menu.Chosen.transform.position);           
-              Vector3 dirToCenter = Vector3.Normalize(Vector3.zero - chosenPosition);
-            float itemScale = Menu.Active ? Menu.Scaler.UniformScale : 0f;
+        {
+            Vector3 chosenPosition = Menu.transform.InverseTransformPoint(Menu.Chosen.transform.position);
+            Vector3 dirToCenter = Vector3.Normalize(Vector3.zero - chosenPosition);
+            float itemScale = Menu.IsActive ? Menu.Scaler.UniformScale : 0f;
             Vector3 a = Vector3.zero; //chosenPosition + dirToCenter * itemScale;
             Vector3 b = chosenPosition - dirToCenter * itemScale;
             Vector3 newPos = Quaternion.Inverse(transform.localRotation) * Vector3.Lerp(a, b, Menu.IndicatorPosition);
@@ -49,19 +48,21 @@ namespace Gustorvo.RadialMenu
             {
                 SetPosition(newPos);
                 SetScale(newScale);
-            }            
-        }        
+            }
+        }
 
         internal override void Animate()
         {
             if (_move)
             {
-                MoveAnimator.Animate(ref _currentPosition, _targetPosition);
+                if (Menu.IsActive) MoveAnimator.Animate(ref _currentPosition, _targetPosition);
+                else MoveAnimator.Animate(ref _currentPosition, _targetPosition, true, true); // make critically damped system when toggling off
                 SetPosition(_currentPosition);
             }
             if (_scale)
             {
-                ScaleAnimator.Animate(ref _currentScale, _targetScale);
+                if (Menu.IsActive) ScaleAnimator.Animate(ref _currentScale, _targetScale);
+                else ScaleAnimator.Animate(ref _currentScale, _targetScale, true, true); // make critically damped system when toggling off
                 SetScale(_currentScale);
             }
 
