@@ -13,8 +13,8 @@ namespace Gustorvo.RadialMenu
     }
     public enum MenuRotationType
     {
-        RotateMenu,
-        RotateIndicator
+        RotateItems,
+        RotateAttachments
     }
 
     public enum Easing

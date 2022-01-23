@@ -10,9 +10,16 @@ namespace Gustorvo.RadialMenu
         public List<MenuItem> ItemList { get; private set; } = new List<MenuItem>();
         private Vector3[] InitialPositions { get; set; }
         private Vector3[] InitialScales { get; set; }
-        public int Count => ItemList.Count;
+        public int Count
+        {
+            get
+            {
+                if (ItemList.Count == 0) Init();
+                return ItemList.Count;
+            }
+        }
         public float DeltaDistance => Vector3.Distance(InitialPositions[0], InitialPositions[1]);
-        public float DistToCenter => Vector3.Distance(ItemList[0].Position, Vector3.zero);
+        public float DistToCenter => Vector3.Distance(ItemList[0].PositionLocal, Vector3.zero);
         public RadialMenu Menu
         {
             get
@@ -33,8 +40,8 @@ namespace Gustorvo.RadialMenu
         }
         public void CreateItemListFromChildren()
         {
-            ItemList ??= new List<MenuItem>();
             if (transform.childCount == _childCount) return; // for performance reasons, don't iterate if hierarchy hasn't changed
+            ItemList = new List<MenuItem>();
             _childCount = transform.childCount;
             Debug.Log("Iterating over children/menu items");
             for (int i = 0; i < _childCount; i++)
@@ -91,8 +98,8 @@ namespace Gustorvo.RadialMenu
                 return (Vector3[])InitialScales.Clone(); // to enable
             return Enumerable.Repeat(Vector3.zero, Count).ToArray(); // to disable
         }
-        public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();      
-        public Vector3[] GetPositions() => ItemList.ConvertAll(i => i.Position).ToArray();
+        public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();
+        public Vector3[] GetPositions() => ItemList.ConvertAll(i => i.PositionLocal).ToArray();
         public bool TryRemoveItem(MenuItem itemToRemove, bool destroyGO = false)
         {
             // if (itemToRemove == null) itemToRemove = ItemList.LastOrDefault();
@@ -107,10 +114,10 @@ namespace Gustorvo.RadialMenu
                 return true;
             }
             return false;
-        }       
+        }
         public void SetPositions(Vector3 position) => ItemList.ForEach(i => i.transform.localPosition = position);
         public void SetPositions(Vector3[] positions) => ItemList.ForEach(i => i.transform.localPosition = positions[i.Index]);
-        public void SetRotation(Quaternion rotation) => transform.rotation = rotation;
+        public void SetLocalRotation(Quaternion rotation) => transform.localRotation = rotation;
         public void SetScales(Vector3 scale) => ItemList.ForEach(i => i.transform.localScale = scale);
         public void SetScales(Vector3[] scales) => ItemList.ForEach(i => i.transform.localScale = scales[i.Index]);
     }

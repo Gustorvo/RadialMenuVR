@@ -1,3 +1,5 @@
+using NaughtyAttributes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +8,7 @@ namespace Gustorvo.RadialMenu
 {
     public class MenuAttachments : MonoBehaviour
     {
-        [SerializeField] Attachment[] _attachments; // popuated in the inspector                
+        [SerializeField] AttachmentBase[] _attachments; // popuated in the inspector                
 
         void Update()
         {
@@ -15,5 +17,19 @@ namespace Gustorvo.RadialMenu
                 _attachments[i]?.Animate();
             }
         }
+
+        internal void SetLocalRotation(Quaternion targetRotation)
+        {
+            for (int i = 0; i < _attachments.Length; i++)
+            {
+                _attachments[i]?.SetLocalRotation(targetRotation);
+            }
+        }
+
+        [Button]
+        private void SnapAllToChosen() => Array.ForEach(_attachments, a => a.SnapToChosenAndSave());
+
+        internal void InitPositionAndScale() => Array.ForEach(_attachments, a => a.InitPosAndScale());
+
     }
 }

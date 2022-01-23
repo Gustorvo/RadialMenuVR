@@ -78,8 +78,7 @@ namespace Gustorvo.RadialMenu
             {
                 _currentScales = Enumerable.Repeat(ItemsInitialScale, Menu.Items.Count).ToArray();
                 _currentScales[Menu.ChosenIndex] *= _upscaleSelectedFactor;
-                Menu.Items.SetScales(_currentScales);
-                Menu.Indicator.InitPositionAndScale();
+                Menu.Items.SetScales(_currentScales);               
             }
             else
             {

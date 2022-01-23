@@ -8,8 +8,10 @@ namespace Gustorvo.RadialMenu
     [RequireComponent(typeof(RadialMenu))]
     public class MenuMover : MonoBehaviour
     {
+        [SerializeField, OnValueChanged("UpdateLocalZAngleCallback"), /*EnableIf("InEditMode"),*/ Range(-180, 180)] public int _localZAngle = 0;
         [SerializeField] AnimatorSettings _moveSettings;
         [SerializeField] AnimatorSettings _rotateSettings;
+
 
         public bool IsRotating => _rotateAnimator.Active; //_angVelocity != 0f;
         public bool IsSlowing { get; private set; }
@@ -24,7 +26,7 @@ namespace Gustorvo.RadialMenu
 
         private RadialMenu _menu;
         private float _curAngleZ;
-        private float _targetAngleZ;
+        private float _targetAngleZ;    
         private Coroutine _toggleCoroutine, _rotateCoroutine;
         private Vector3[] _targetPositions;
         private Vector3[] _currentPositions;
@@ -49,11 +51,11 @@ namespace Gustorvo.RadialMenu
 
         public void Init()
         {
-            int count = Menu.Items.Count;
+            int count = Menu.Items.Count;         
             _moveAnimator = new IAnimator[count];
             _targetPositions = Menu.Items.GetTargetPositions();
             _currentPositions = new Vector3[count];
-            _curAngleZ = Menu.RotationOffset.eulerAngles.z;
+           // _curAngleZ = Menu.RotationOffset.eulerAngles.z;
             _targetAngleZ = _curAngleZ;
             //  _angVelocity = 0.0f;          
             bool springMovement = _moveSettings.AnimateUsing == Easing.NumericSpring;
@@ -71,22 +73,31 @@ namespace Gustorvo.RadialMenu
             SetPositionAndRotation();
         }
 
-        private void SetPositionAndRotation()
+        private void UpdateLocalZAngleCallback() 
         {
-            // --- move and rotate menu & indicator ---
-            Quaternion newRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
-            Quaternion lookForwardRot = Quaternion.LookRotation(Menu.AnchorToFollow.forward);
-            Menu.transform.rotation = lookForwardRot;
-            if (Menu.RotationType == MenuRotationType.RotateMenu)
+            if (Menu.InEditMode)
             {
-                Menu.Items.SetRotation(lookForwardRot * newRot);
+                Menu.transform.rotation =  Quaternion.AngleAxis(_localZAngle, Vector3.forward);
             }
-            else // rotate indicator
-            {              
-                Menu.Indicator.SetRotation(lookForwardRot * newRot);
-            }
+        }
 
+        private void SetPositionAndRotation()
+        {                
+            Quaternion newAnimatedRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+            Quaternion lookForwardRot = Quaternion.LookRotation(Menu.AnchorToFollow.forward);
+            Quaternion newTargetRot = lookForwardRot * Quaternion.AngleAxis(_localZAngle, Vector3.forward);
+
+            Menu.transform.rotation = newTargetRot;
             Menu.transform.position = Menu.AnchorToFollow.position;
+
+            if (Menu.RotationType == MenuRotationType.RotateItems)
+            {
+                Menu.Items.SetLocalRotation(newAnimatedRot);
+            }
+            else // rotate attachments
+            {
+                Menu.Attachments.SetLocalRotation(newAnimatedRot);
+            }
         }
 
         /// <summary>
@@ -144,13 +155,14 @@ namespace Gustorvo.RadialMenu
         }
 
         #region Debug
-        [Button("Next")]
+        private bool editor => Menu.InEditMode;
+        [Button("Next"), DisableIf("editor")]
         public void DebugNext() => Menu.ShiftItems(1);
 
-        [Button("Previous")]
+        [Button("Previous"), DisableIf("editor")]
         public void DebugPrev() => Menu.ShiftItems(-1);
 
-        [Button("ToggleVisibility")]
+        [Button("ToggleVisibility"), DisableIf("editor")]
         public void DebugToggleVisibility() => Menu.ToogleVisibility();
 
         #endregion

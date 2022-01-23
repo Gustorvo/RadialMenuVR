@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e27f9e57955fcf45a52a755253d7dfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <AttachedObj>k__BackingField: {fileID: 3681225980100346884}
   <MoveSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -72,7 +73,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
     <Damping>k__BackingField: 0.45
-    <Frequency>k__BackingField: 8
+    <Frequency>k__BackingField: 2.5
     <AllowSnapping>k__BackingField: 0
   <ScaleSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
@@ -102,14 +103,14 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
     <Damping>k__BackingField: 0.75
-    <Frequency>k__BackingField: 12
+    <Frequency>k__BackingField: 4
     <AllowSnapping>k__BackingField: 0
   _move: 1
   _scale: 1
-  _textTransform: {fileID: 3681225980100346884}
-  _textRotatesWithIndicator: 1
-  _textScalesWithRadius: 1
-  _textMovesWithRadius: 1
+  _rotate: 1
+  _movesAsRadiusChanging: 1
+  _scalesAsRadiusChanging: 1
+  _alwaysLookUpRotation: 1
 --- !u!1 &4886707238426917795
 GameObject:
   m_ObjectHideFlags: 0
@@ -136,8 +137,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4886707238426917795}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: 0, y: 0.1695, z: 0}
+  m_LocalScale: {x: 0.1041446, y: 0.1041446, z: 0.1041446}
   m_Children: []
   m_Father: {fileID: 3951279677410888627}
   m_RootOrder: 0
@@ -191,7 +192,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4886707238426917795}
-  m_Text: Item text
+  m_Text: 0
   m_OffsetZ: 0
   m_CharacterSize: 0.05
   m_LineSpacing: 1
@@ -389,6 +390,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6249230d2c401904594974010d166834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <AttachedObj>k__BackingField: {fileID: 2413744870794411349}
   <MoveSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -417,7 +419,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
     <Damping>k__BackingField: 0.45
-    <Frequency>k__BackingField: 8
+    <Frequency>k__BackingField: 2.5
     <AllowSnapping>k__BackingField: 0
   <ScaleSettings>k__BackingField:
     <AnimateUsing>k__BackingField: 0
@@ -447,11 +449,14 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.5
     <Damping>k__BackingField: 0.75
-    <Frequency>k__BackingField: 10
+    <Frequency>k__BackingField: 3
     <AllowSnapping>k__BackingField: 0
   _move: 1
   _scale: 1
-  _iconTransform: {fileID: 2413744870794411349}
+  _rotate: 1
+  _movesAsRadiusChanging: 1
+  _scalesAsRadiusChanging: 1
+  _alwaysLookUpRotation: 1
 --- !u!1 &7185158987025810765
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,8 +482,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7185158987025810765}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.073332004, z: 0}
-  m_LocalScale: {x: 0.1328, y: 0.1328, z: 0.1328}
+  m_LocalPosition: {x: 0, y: 0.088599995, z: 0}
+  m_LocalScale: {x: 0.08108742, y: 0.08108742, z: 0.08108742}
   m_Children: []
   m_Father: {fileID: 5493507673898989503}
   m_RootOrder: 0
@@ -681,12 +686,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _menuItemsPrefab: {fileID: 7018532599971761334, guid: 55dac42269f7ab447af494dd0fc768ac, type: 3}
   _circleType: 0
-  _chosenStartsOn: 0
-  _rotationOffset: 0
-  <Radius>k__BackingField: 0.1
-  <IndicatorPosition>k__BackingField: 0.315
-  <RotationType>k__BackingField: 0
+  <Radius>k__BackingField: 0.116
+  <RotationType>k__BackingField: 1
   <Items>k__BackingField: {fileID: 2104357683}
+  <Attachments>k__BackingField: {fileID: 1947982445}
   <AnchorToFollow>k__BackingField: {fileID: 0}
   <RadiusAffectsScale>k__BackingField: 1
   <ChosenIndex>k__BackingField: 0
@@ -702,9 +705,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a6d03bad009b3b4f8ac68a61c15c55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _upscaleSelectedFactor: 2
-  _itemScaleFactor: 0.664
-  _itemUniformScale: 0.1328
+  _upscaleSelectedFactor: 1.919
+  _itemScaleFactor: 0.33
+  _itemUniformScale: 0.072384
   _scaleSettings:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -742,7 +745,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.35
     <Damping>k__BackingField: 0.5
-    <Frequency>k__BackingField: 8
+    <Frequency>k__BackingField: 2.6
     <AllowSnapping>k__BackingField: 0
 --- !u!114 &7560167499516101224
 MonoBehaviour:
@@ -756,6 +759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9631a3b8f74087498f4e824d20c69e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _localZAngle: 0
   _moveSettings:
     <AnimateUsing>k__BackingField: 0
     <Curve>k__BackingField:
@@ -793,7 +797,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.35
     <Damping>k__BackingField: 0.45
-    <Frequency>k__BackingField: 12
+    <Frequency>k__BackingField: 4
     <AllowSnapping>k__BackingField: 0
   _rotateSettings:
     <AnimateUsing>k__BackingField: 0
@@ -832,7 +836,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     <Duration>k__BackingField: 0.35
     <Damping>k__BackingField: 0.5
-    <Frequency>k__BackingField: 4
+    <Frequency>k__BackingField: 1.5
     <AllowSnapping>k__BackingField: 0
 --- !u!114 &1947982445
 MonoBehaviour:
@@ -874,8 +878,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167500024231028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.000000008742278, y: -0.1, z: 0}
-  m_LocalScale: {x: 0.1328, y: 0.1328, z: 0.1328}
+  m_LocalPosition: {x: -0.000000010141042, y: -0.116, z: 0}
+  m_LocalScale: {x: 0.072384, y: 0.072384, z: 0.072384}
   m_Children:
   - {fileID: 7560167501357760601}
   m_Father: {fileID: 9213030890333058286}
@@ -919,8 +923,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7560167501164814390}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: 0}
-  m_LocalScale: {x: 0.2656, y: 0.2656, z: 0.2656}
+  m_LocalPosition: {x: 0, y: 0.116, z: 0}
+  m_LocalScale: {x: 0.1389049, y: 0.1389049, z: 0.1389049}
   m_Children:
   - {fileID: 7560167499385239488}
   - {fileID: 7263129511155338173}

@@ -3,42 +3,10 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ChosenText : Attachment
-    {
-        [SerializeField] Transform _textTransform;
-        [SerializeField] bool _textRotatesWithIndicator = true;
-        [SerializeField] bool _textScalesWithRadius = true;
-        [SerializeField] bool _textMovesWithRadius = true;
-        private TextMesh _text;
-        private Vector3 _initialPosition, _initialScale;
-        private Vector3 _currentPosition, _currentScale;
-        private float _distToOuterCircle;
-        private Vector3 _targetPosition
-        {
-            get
-            {
-                Vector3 pos = Menu.IsActive ? _initialPosition : Vector3.zero;
-                if (Menu.IsActive && _textMovesWithRadius)
-                {
-                    pos = _dirToCenter * (Menu.Radius + Menu.Scaler.UniformScale + _distToOuterCircle);
-                }
-                return pos;
-            }
-        }
-        private Vector3 _targetScale
-        {
-            get
-            {
-                Vector3 scale = Menu.IsActive ? _initialScale : Vector3.zero;
-                if (Menu.IsActive && _textScalesWithRadius)
-                {
-                    scale = _initialScale + Menu.Scaler.UniformScale * Vector3.one;
-                }
-                return scale;
-            }
-        }
-        private Vector3 _dirToCenter;
-
+    public class ChosenText : AttachmentBase
+    {      
+        private TextMesh _text;     
+        private Vector3 _currentPosition, _currentScale; 
 
         private new void Awake()
         {
@@ -46,18 +14,20 @@ namespace Gustorvo.RadialMenu
             Menu.OnItemChosen -= SetItemText;
             Menu.OnItemChosen += SetItemText;
 
-            _text = GetComponentInChildren<TextMesh>();
-            _initialPosition = _textTransform.localPosition;
-            _initialScale = _textTransform.localScale;
-            _distToOuterCircle = Vector3.Distance(Vector3.zero, _textTransform.localPosition) - Menu.Radius;
-            _dirToCenter = Vector3.Normalize(_textTransform.localPosition - Vector3.zero);
+            _text = GetComponentInChildren<TextMesh>();          
         }
-
-        private void Update()
+       
+        internal override void SetLocalRotation(Quaternion targetRotation)
         {
-            if (Menu.RotationType == MenuRotationType.RotateIndicator && _textRotatesWithIndicator)
-                transform.localRotation = Menu.Indicator.transform.localRotation * Menu.RotationOffset;
+            if (_rotate) transform.localRotation = targetRotation;
+            if (_alwaysLookUpRotation)
+            {
+                AttachedObj.forward = Menu.AnchorToFollow.forward;
+            }
         }
+        internal override void SetPosition(Vector3 position) => AttachedObj.localPosition = position;
+        internal override void SetScale(Vector3 scale) => AttachedObj.localScale = scale;
+
 
         private void SetItemText(MenuItem item)
         {
@@ -68,22 +38,20 @@ namespace Gustorvo.RadialMenu
         {
             if (_move)
             {
-                if (Menu.IsActive) MoveAnimator.Animate(ref _currentPosition, _targetPosition);
-                else MoveAnimator.Animate(ref _currentPosition, _targetPosition, true, true); // make critically damped system when toggling off
-                _textTransform.localPosition = _currentPosition;
+                if (Menu.IsActive) MoveAnimator.Animate(ref _currentPosition, TargetPosition);
+                else MoveAnimator.Animate(ref _currentPosition, TargetPosition, true, true); // make critically damped system when toggling off
+                SetPosition(_currentPosition);
             }
             if (_scale)
             {
-                if (Menu.IsActive) ScaleAnimator.Animate(ref _currentScale, _targetScale);
-                else ScaleAnimator.Animate(ref _currentScale, _targetScale, true, true); // make critically damped system when toggling off
-                _textTransform.localScale = _currentScale;
-            }
-
-            _textTransform.forward = Menu.AnchorToFollow.forward;
+                if (Menu.IsActive) ScaleAnimator.Animate(ref _currentScale, TargetScale);
+                else ScaleAnimator.Animate(ref _currentScale, TargetScale, true, true); // make critically damped system when toggling off
+                SetScale(_currentScale);
+            }            
         }
         private void OnDestroy()
         {
             Menu.OnItemChosen -= SetItemText;
-        }
+        }       
     }
 }

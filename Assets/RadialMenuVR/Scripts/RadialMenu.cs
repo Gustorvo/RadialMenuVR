@@ -13,24 +13,18 @@ namespace Gustorvo.RadialMenu
     public class RadialMenu : MonoBehaviour
     {
         [SerializeField] MenuItem _menuItemsPrefab;
-        [SerializeField, OnValueChanged("OnSettingsChangedCallback")] MenuCircleType _circleType = MenuCircleType.FullCircle;
-        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), EnableIf("InEditMode")] ChosenOffset _chosenStartsOn = ChosenOffset.Beginning;
-        [SerializeField, OnValueChanged("OnSettingsChangedCallback"), EnableIf("InEditMode"), Range(-180, 180)] public int _rotationOffset = 0;
+        [SerializeField, OnValueChanged("OnSettingsChangedCallback")] MenuCircleType _circleType = MenuCircleType.FullCircle;        
         [field: SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(minRadius, maxRadius)] public float Radius { get; internal set; } = minRadius;
-        [field: SerializeField, OnValueChanged("OnSettingsChangedCallback"), Range(0f, 1f)] public float IndicatorPosition { get; private set; } = 0.5f;// position of the indicator relative to the center
-        [field: SerializeField, EnableIf("InEditMode")] public MenuRotationType RotationType { get; private set; } = MenuRotationType.RotateMenu;
+        [field: SerializeField, EnableIf("InEditMode")] public MenuRotationType RotationType { get; private set; } = MenuRotationType.RotateItems;
         [field: SerializeField] public ItemsManager Items { get; private set; }
+        [field: SerializeField] public MenuAttachments Attachments { get; private set; }
         [field: SerializeField] public Transform AnchorToFollow { get; private set; }  // menu will move after this transform (usually a VR controller)
         [field: SerializeField, OnValueChanged("OnSettingsChangedCallback")] public bool RadiusAffectsScale { get; private set; } = true;
-        public Quaternion RotationOffset { get; private set; } = Quaternion.identity;
-        public bool Initialized { get; private set; } = false;
-        public MenuItem Chosen { get; private set; } = null;
-        /// <summary>
-        /// index of currently chosen item in menu
-        /// </summary>
-        [field: SerializeField, ReadOnly]
-        public int ChosenIndex { get; private set; }
+        [field: SerializeField, ReadOnly] public int ChosenIndex { get; private set; } = 0;
+        [ShowNativeProperty]  int Number_Of_Items => Items.Count; 
         public float SpaceRad => _circleType == MenuCircleType.FullCircle ? Mathf.PI * 2f : Mathf.PI;
+        public bool Initialized { get; private set; } = false;
+        public MenuItem Chosen { get; private set; } = null;       
         public float ItemsDelataDistDeg => Items.Count > 0 ? SpaceDegrees / Items.Count : 0f; // angular distance (in degrees) between each elements in the menu    
         public bool InEditMode => Application.isEditor && !Application.isPlaying;
         public float SpaceDegrees => SpaceRad * Mathf.Rad2Deg;
@@ -50,6 +44,14 @@ namespace Gustorvo.RadialMenu
                 return _scaler;
             }
         }
+        public MenuMover Mover
+        {
+            get
+            {
+                if (_mover == null) _mover = GetComponent<MenuMover>();
+                return _mover;
+            }
+        }
         public ChosenText Text
         {
             get
@@ -62,7 +64,7 @@ namespace Gustorvo.RadialMenu
         {
             get => InEditMode ? true : _active;
             private set => _active = value;
-        }      
+        }
         public event Action<MenuItem> OnItemChosen; // get called when an item being chosen                                                  
         public event Action OnToggleVisibility; // get called when menu activates/deactivates
         public event Action OnMenuRebuild; // get called when any of the menu properties getchanged (radius, offset, scale etc)
@@ -73,9 +75,9 @@ namespace Gustorvo.RadialMenu
         private ChosenIndicator _indicator;
         private bool _active = false;
         private MenuScaler _scaler;
+        private MenuMover _mover;
         private ChosenText _text;
         private int _prevIndex;
-
 
         private void Awake()
         {
@@ -85,11 +87,7 @@ namespace Gustorvo.RadialMenu
                 // it will allow to drive pos & rot directrly 
                 AnchorToFollow = transform;
             }
-            Init();
-            if (Items.TryGetItem(ChosenIndex, out MenuItem item))
-            {
-                Chosen = item;
-            }
+            Init();            
         }
         public void Rebuild()
         {
@@ -101,9 +99,7 @@ namespace Gustorvo.RadialMenu
                 // apply changes directly when in edit mode & not running
                 Items.SetPositions(Items.GetInitialPositions());
                 Scaler.Scale();
-                Indicator.InitPositionAndScale();
-                Items.SetRotation(RotationOffset);
-                Indicator.SetRotation(RotationOffset);
+                Attachments.InitPositionAndScale();                
             }
         }
 
@@ -111,46 +107,19 @@ namespace Gustorvo.RadialMenu
         {
             Items.Init();
             InitChosen();
-            InitRotationOffset();
             Initialized = true;
         }
         private void InitChosen()
         {
-            if (!InEditMode) return;
-
-            int chosen =
-                             _chosenStartsOn == ChosenOffset.Middle ? Items.Count / 2 : // middle
-                            _chosenStartsOn == ChosenOffset.End ? Items.Count - 1 :     // end
-                            0;                                                           // start
-
-            ChosenIndex = chosen;
+            // if (!InEditMode) return;
+            if (Initialized) return;
+            ChosenIndex = 0;
             if (Items.TryGetItem(ChosenIndex, out MenuItem item))
             {
                 Chosen = item;
+                OnItemChosen?.Invoke(item);
             }
-        }
-
-        private void InitRotationOffset() => RotationOffset = Quaternion.AngleAxis(_rotationOffset, Vector3.forward);
-
-
-        [Button(enabledMode: EButtonEnableMode.Editor)]
-        private void CreateItem()
-        {
-            Instantiate(_menuItemsPrefab, Items.transform);
-            Rebuild();
-        }
-        [Button(enabledMode: EButtonEnableMode.Editor)]
-        private void DestroyItem()
-        {
-            if (!Initialized) Init();
-            if (Items.Count > 2)
-            {
-                if (Items.TryRemoveItem(null, true))
-                    Rebuild();
-            }
-            else Debug.LogWarning("Can't remove since there should be at least 2 items in the menu (for it to work)!");
-        }
-
+        } 
 
         private IEnumerator Start()
         {
@@ -180,7 +149,7 @@ namespace Gustorvo.RadialMenu
         /// <param name="step"></param>
         public void ShiftItems(int step)
         {
-            if (!IsActive) return;
+            // if (!IsActive) return;
             _prevIndex = ChosenIndex;
             if (SetChosenIndex(step) == _prevIndex) step = 0;
             if (Items.TryGetItem(ChosenIndex, out MenuItem item))
@@ -245,13 +214,33 @@ namespace Gustorvo.RadialMenu
         {
             // invert the step (and hence the direction),
             // which is opposite of rotating all items in a circle
-            if (RotationType == MenuRotationType.RotateIndicator)
+            if (RotationType == MenuRotationType.RotateAttachments)
                 step *= -1;
             OnStep?.Invoke(step);
-        }
+        }       
 
         private bool IsLast(int index) => index == Items.Count - 1;
         private bool IsFirst(int index) => index == 0;
+        
+        #region Buttons
+        [Button(enabledMode: EButtonEnableMode.Editor)]
+        private void CreateItem()
+        {
+            Instantiate(_menuItemsPrefab, Items.transform);
+            Rebuild();
+        }
+        [Button(enabledMode: EButtonEnableMode.Editor)]
+        private void DestroyItem()
+        {
+            if (!Initialized) Init();
+            if (Items.Count > 2)
+            {
+                if (Items.TryRemoveItem(null, true))
+                    Rebuild();
+            }
+            else Debug.LogWarning("Can't remove since there should be at least 2 items in the menu (for it to work)!");
+        }
+        #endregion // end buttons
 
         #region Callbacks
         private void OnSettingsChangedCallback()
