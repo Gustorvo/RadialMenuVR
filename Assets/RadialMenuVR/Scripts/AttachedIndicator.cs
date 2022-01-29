@@ -5,9 +5,10 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ChosenIndicator : AttachmentBase
+    public class AttachedIndicator : AttachmentBase
     {
         private Vector3 _currentPosition, _currentScale;
+        private Quaternion _currentRotation;       
 
         private new void Awake()
         {
@@ -15,12 +16,8 @@ namespace Gustorvo.RadialMenu
         }
 
         internal override void SetPosition(Vector3 position) => AttachedObj.localPosition = position;
-        internal override void SetScale(Vector3 scale) => AttachedObj.localScale = scale;        
-
-        internal override void SetLocalRotation(Quaternion targetRotation)
-        {
-            if (_rotate) transform.localRotation = targetRotation;            
-        }
+        internal override void SetScale(Vector3 scale) => AttachedObj.localScale = scale; 
+        internal override void SetLocalRotation(Quaternion targetRotation) => transform.localRotation = targetRotation;        
 
         internal override void Animate()
         {
@@ -29,6 +26,11 @@ namespace Gustorvo.RadialMenu
                 if (Menu.IsActive) MoveAnimator.Animate(ref _currentPosition, TargetPosition);
                 else MoveAnimator.Animate(ref _currentPosition, TargetPosition, true, true); // make critically damped system when toggling off
                 SetPosition(_currentPosition);
+            }
+            if (_rotate)
+            {                
+                RotateAnimator.Animate(ref _currentRotation, TargetRotation);
+                SetLocalRotation(_currentRotation);
             }
             if (_scale)
             {

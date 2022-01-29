@@ -27,7 +27,7 @@ namespace Gustorvo.RadialMenu
         }
 
         [Button]
-        private void SnapAllToChosen() => Array.ForEach(_attachments, a => a.SnapToChosenAndSave());
+        private void SnapAllToSelected() => Array.ForEach(_attachments, a => a.SnapToSelectedAndSave());
 
         internal void InitPositionAndScale() => Array.ForEach(_attachments, a => a.InitPosAndScale());
 

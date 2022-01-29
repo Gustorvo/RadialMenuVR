@@ -1,3 +1,5 @@
+using NaughtyAttributes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,9 @@ namespace Gustorvo.RadialMenu
 {
     public class ItemsManager : MonoBehaviour
     {
+        [SerializeField] MenuItem _menuItemsPrefab;
+        [SerializeField, OnValueChanged("OnColorChangedCallback")] Color _selectedColor;
+        [SerializeField, OnValueChanged("OnColorChangedCallback")] Color _normalColor;
         public List<MenuItem> ItemList { get; private set; } = new List<MenuItem>();
         private Vector3[] InitialPositions { get; set; }
         private Vector3[] InitialScales { get; set; }
@@ -14,12 +19,11 @@ namespace Gustorvo.RadialMenu
         {
             get
             {
-                if (ItemList.Count == 0) Init();
+               // if (ItemList.Count == 0) Init();
                 return ItemList.Count;
             }
         }
         public float DeltaDistance => Vector3.Distance(InitialPositions[0], InitialPositions[1]);
-        public float DistToCenter => Vector3.Distance(ItemList[0].PositionLocal, Vector3.zero);
         public RadialMenu Menu
         {
             get
@@ -28,28 +32,77 @@ namespace Gustorvo.RadialMenu
                 return _menu;
             }
         }
-
         private RadialMenu _menu;
-        private int _childCount; // keeps track of number of children/items       
+        private int _childCountFromLastInit; // keeps track of number of children/items
 
+        private void Awake()
+        {
+            Menu.OnItemSelected -= SetSelectedColorForItem;
+            Menu.OnItemSelected += SetSelectedColorForItem;
+        }
+
+        private void OnDestroy()
+        {
+            Menu.OnItemSelected -= SetSelectedColorForItem;
+        }
+        public bool TryRemoveItem(MenuItem itemToRemove, bool destroyGO = false)
+        {
+            // if (itemToRemove == null) itemToRemove = ItemList.LastOrDefault();
+            itemToRemove ??= ItemList.LastOrDefault();
+            if (ItemList.Contains(itemToRemove))
+            {
+                ItemList.Remove(itemToRemove);
+                if (destroyGO)
+                {
+                    DestroyImmediate(itemToRemove.gameObject);
+                }
+                return true;
+            }
+            return false;
+        }
+        public void DestroyAll()
+        {
+            if (!Menu.Initialized) Menu.Init();
+            for (int i = 0; i < ItemList.Count; i++)
+            {
+                DestroyImmediate(ItemList[i].gameObject);
+            }
+            ItemList.Clear();
+        }
+
+        #region Init
         public void Init()
         {
             CreateItemListFromChildren();
             InitPositions(); // too costy! Optimize!            
             InitScales();
         }
+
+        internal void CreateFromArray(IPlaceble[] placeableItems)
+        {       
+            DestroyAll();
+            for (int i = 0; i < placeableItems.Length; i++)
+            {
+                MenuItem newItem = Instantiate(_menuItemsPrefab, transform);
+                newItem.InitFromPlaceable(placeableItems[i]);
+                ItemList.Add(newItem);
+            }
+            _childCountFromLastInit = transform.childCount;
+            Debug.Log($"Created new menu of {placeableItems.Length} items");
+            Menu.Rebuild();
+        }
         public void CreateItemListFromChildren()
         {
-            if (transform.childCount == _childCount) return; // for performance reasons, don't iterate if hierarchy hasn't changed
+            if (transform.childCount == _childCountFromLastInit) return; // for performance reasons, don't iterate if hierarchy hasn't changed
             ItemList = new List<MenuItem>();
-            _childCount = transform.childCount;
+            _childCountFromLastInit = transform.childCount;
             Debug.Log("Iterating over children/menu items");
-            for (int i = 0; i < _childCount; i++)
+            for (int i = 0; i < _childCountFromLastInit; i++)
             {
                 var child = transform.GetChild(i);
                 if (child.TryGetComponent(out MenuItem newItem) && !ItemList.Contains(newItem))
                 {
-                    newItem.Init(i, i.ToString());
+                    newItem.Init(i, i.ToString(), null);
                     ItemList.Add(newItem);
                 }
             }
@@ -78,7 +131,9 @@ namespace Gustorvo.RadialMenu
             Menu.Scaler.InitScale();
             InitialScales = Enumerable.Repeat(Menu.Scaler.ItemsInitialScale, Count).ToArray();
         }
+        #endregion // end init
 
+        #region Getters
         public bool TryGetItem(int index, out MenuItem item)
         {
             item = null;
@@ -99,26 +154,60 @@ namespace Gustorvo.RadialMenu
             return Enumerable.Repeat(Vector3.zero, Count).ToArray(); // to disable
         }
         public Vector3[] GetInitialPositions() => (Vector3[])InitialPositions.Clone();
+        public Vector3[] GetInitialScales() => (Vector3[])InitialScales.Clone();
         public Vector3[] GetPositions() => ItemList.ConvertAll(i => i.PositionLocal).ToArray();
-        public bool TryRemoveItem(MenuItem itemToRemove, bool destroyGO = false)
-        {
-            // if (itemToRemove == null) itemToRemove = ItemList.LastOrDefault();
-            itemToRemove ??= ItemList.LastOrDefault();
-            if (ItemList.Contains(itemToRemove))
-            {
-                ItemList.Remove(itemToRemove);
-                if (destroyGO)
-                {
-                    DestroyImmediate(itemToRemove.gameObject);
-                }
-                return true;
-            }
-            return false;
-        }
+        #endregion // end getters
+
+        #region Setters
         public void SetPositions(Vector3 position) => ItemList.ForEach(i => i.transform.localPosition = position);
         public void SetPositions(Vector3[] positions) => ItemList.ForEach(i => i.transform.localPosition = positions[i.Index]);
-        public void SetLocalRotation(Quaternion rotation) => transform.localRotation = rotation;
+        public void SetLocalRotation(Quaternion rotation)
+        {
+            if (Menu.RotationType == MenuRotationType.RotateItems)
+                transform.localRotation = rotation;
+        }
+        public void SetForwardForItem(MenuItem item) => item.transform.forward = Menu.AnchorToFollow.forward;
         public void SetScales(Vector3 scale) => ItemList.ForEach(i => i.transform.localScale = scale);
         public void SetScales(Vector3[] scales) => ItemList.ForEach(i => i.transform.localScale = scales[i.Index]);
+        public void SetScale(MenuItem item, Vector3 scale) => item.transform.localScale = scale;
+        public void SetSelectedColorForItem(MenuItem item, bool confirmed)
+        {
+            if (confirmed)
+            {
+                SetNormalColor();
+                item?.SetColor(_selectedColor);
+            }
+        }
+        public void SetNormalColor() => ItemList.ForEach(i => i.SetColor(_normalColor));
+
+        #endregion // end setters
+
+        #region Editor
+        // --- Buttons --- //
+        [Button(enabledMode: EButtonEnableMode.Editor)]
+        private void CreateItem()
+        {
+            Instantiate(_menuItemsPrefab, transform);
+            Menu.Rebuild();
+        }
+        [Button(enabledMode: EButtonEnableMode.Editor)]
+        private void DestroyItem()
+        {
+            if (!Menu.Initialized) Menu.Init();
+            if (Count > 2)
+            {
+                if (TryRemoveItem(null, true))
+                    Menu.Rebuild();
+            }
+            else Debug.LogWarning("Can't remove since there should be at least 2 items in the menu (for it to work)!");
+        }
+        // --- --- //       
+
+        public void OnColorChangedCallback()
+        {
+            if (!Menu.Initialized) Menu.Init();
+            SetSelectedColorForItem(Menu.SelectedItem, true);
+        }
+        #endregion // end editor
     }
 }

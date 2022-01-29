@@ -3,16 +3,17 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class ChosenText : AttachmentBase
+    public class AttachedText : AttachmentBase
     {      
         private TextMesh _text;     
-        private Vector3 _currentPosition, _currentScale; 
+        private Vector3 _currentPosition, _currentScale;
+        private Quaternion _currentRotation;
 
         private new void Awake()
         {
             base.Awake();
-            Menu.OnItemChosen -= SetItemText;
-            Menu.OnItemChosen += SetItemText;
+            Menu.OnItemHovered -= SetItemText;
+            Menu.OnItemHovered += SetItemText;
 
             _text = GetComponentInChildren<TextMesh>();          
         }
@@ -31,7 +32,7 @@ namespace Gustorvo.RadialMenu
 
         private void SetItemText(MenuItem item)
         {
-            _text.text = item.Text;
+            _text.text = item.ItemText;
         }
 
         internal override void Animate()
@@ -42,6 +43,11 @@ namespace Gustorvo.RadialMenu
                 else MoveAnimator.Animate(ref _currentPosition, TargetPosition, true, true); // make critically damped system when toggling off
                 SetPosition(_currentPosition);
             }
+            if (_rotate)
+            {
+                RotateAnimator.Animate(ref _currentRotation, TargetRotation);
+                SetLocalRotation(_currentRotation);
+            }
             if (_scale)
             {
                 if (Menu.IsActive) ScaleAnimator.Animate(ref _currentScale, TargetScale);
@@ -51,7 +57,7 @@ namespace Gustorvo.RadialMenu
         }
         private void OnDestroy()
         {
-            Menu.OnItemChosen -= SetItemText;
+            Menu.OnItemHovered -= SetItemText;
         }       
     }
 }

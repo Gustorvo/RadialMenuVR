@@ -46,7 +46,7 @@ namespace Gustorvo.RadialMenu
 
             curValue = Vector3.LerpUnclamped(_originVector3, _targetVector3, _curvePercent);
         }
-        public void Animate(ref float curValue, /*ref float velocity,*/ float targetValue, bool removeOscillation = false, bool doubleFrequency = false)
+        public void Spring(ref float curValue, /*ref float velocity,*/ float targetValue, bool removeOscillation = false, bool doubleFrequency = false)
         {
             if (targetValue != _target)
             {
@@ -61,6 +61,16 @@ namespace Gustorvo.RadialMenu
             _prevValue = curValue;
             curValue = Mathf.LerpUnclamped(_origin, _target, _curvePercent);
             _velocity = _done ? 0f : (curValue - _prevValue) / Time.deltaTime;
+        }
+
+        public void Activate(ref Quaternion curRot, Quaternion targetRot)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Animate(ref Quaternion curRot, Quaternion targetRot)
+        {
+            throw new NotImplementedException();
         }
     }
 }

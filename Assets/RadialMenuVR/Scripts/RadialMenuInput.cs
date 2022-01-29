@@ -18,19 +18,25 @@ namespace Gustorvo.RadialMenu
             _menu.ShiftItems(step);
         }
 
+        public void BeginSelectItem() => _menu.SetSelected(false);
+        public void EndSelectItem() => _menu.SetSelected(true);
+
         private void Awake()
         {
             _menu = GetComponent<RadialMenu>();
-            _input?.OnTriggerPress.AddListener(ToggleMenu);
+            _input?.OnTriggerPress.AddListener(BeginSelectItem);
+            _input?.OnTriggerRelease.AddListener(EndSelectItem);
+            _input?.OnPrimaryButtonPress.AddListener(ToggleMenu);
             _input?.OnPrimary2DAxisLeft.AddListener(() => ChangeMenuItem(-1));
             _input?.OnPrimary2DAxisRight.AddListener(() => ChangeMenuItem(1));
         }
         private void OnDestroy()
         {
-            _input?.OnTriggerPress.RemoveListener(ToggleMenu);
-            _input?.OnPrimary2DAxisLeft.RemoveListener(() => ChangeMenuItem(-1));
-            _input?.OnPrimary2DAxisRight.RemoveListener(() => ChangeMenuItem(1));
-
+            _input?.OnTriggerPress.RemoveAllListeners();
+            _input?.OnTriggerRelease.RemoveAllListeners();
+            _input?.OnPrimaryButtonPress.RemoveAllListeners();
+            _input?.OnPrimary2DAxisLeft.RemoveAllListeners();
+            _input?.OnPrimary2DAxisRight.RemoveAllListeners();
         }
     }
 }

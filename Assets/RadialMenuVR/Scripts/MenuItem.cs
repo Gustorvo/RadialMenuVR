@@ -3,38 +3,52 @@ using UnityEngine;
 
 namespace Gustorvo.RadialMenu
 {
-    public class MenuItem : MenuItemBase
+    public class MenuItem : MenuItemBase, IPlaceble
     {
-        [SerializeField] GameObject _icon;     
+        [SerializeField] GameObject _icon;
         public GameObject Icon => _icon;
-        public Vector3 PositionLocal => transform.localPosition;      
+        public Vector3 PositionLocal => transform.localPosition;
         public Quaternion Rotation => transform.rotation;
         public Vector3 ScaleLocal => transform.localScale;
         public SpriteRenderer SpriteRenderer { get; private set; }
+        public Vector3 InitPos { get; private set; } = Vector3.zero;
+        public Vector3 InitScale { get; private set; } = Vector3.zero;
+        public string ItemText { get; private set; } = string.Empty;
+        public Sprite SpriteIcon { get; private set; }
         public int Index { get; private set; }
-        public string Text { get; private set; } = string.Empty;
-        private Vector3 _initPos = Vector3.zero;
-        private float _initRad = 0;
+
+
+        //  private float _initRad = 0;
 
         private void Awake()
         {
-            SpriteRenderer = Icon.GetComponent<SpriteRenderer>();            
+            SpriteRenderer = Icon.GetComponent<SpriteRenderer>();
         }
         private void Start()
         {
-            _initPos = Menu.Items.GetInitialPositions()[Index];
-            _initRad = Menu.Radius;
+            InitPos = Menu.Items.GetInitialPositions()[Index];
+            InitScale = Menu.Items.GetInitialScales()[Index];
+            if (SpriteIcon != null)
+                SpriteRenderer.sprite = SpriteIcon;
+            // _initRad = Menu.Radius;
         }
 
         public void SetColor(Color newColor)
         {
-            Icon.GetComponent<SpriteRenderer>().color = newColor;
+            if (SpriteRenderer == null) // for editor initialisation
+                SpriteRenderer = Icon.GetComponent<SpriteRenderer>();
+            SpriteRenderer.color = newColor;
         }
 
-        public void Init(int index, string text)
+        public void Init(int index, string text, Sprite sprite)
         {
             Index = index;
-            Text = text;
+            ItemText = text;
+            SpriteIcon = sprite;
+        }
+        internal void InitFromPlaceable(IPlaceble placeble)
+        {
+            Init(placeble.Index, placeble.ItemText, placeble.SpriteIcon);
         }
 
         /// <summary>
@@ -50,5 +64,7 @@ namespace Gustorvo.RadialMenu
             Vector3 dirToCenter = Vector3.Normalize(relativePosLocal - Vector3.zero);
             return dirToCenter * Menu.Radius;
         }
+
+
     }
 }

@@ -11,10 +11,10 @@ namespace Gustorvo.RadialMenu
     public class XRControllerInput : MonoBehaviour
     {
         [SerializeField, Tooltip("Left or Right Hand.")]
-        private XRNode XRController = XRNode.RightHand;
+        private XRNode _xRController = XRNode.RightHand;
 
         [SerializeField, Tooltip("Input value below this threshold won't be registered")]
-        private float minAxisThreshold = 0.15f;
+        private float _minAxisThreshold = 0.15f;
 
         #region private varialbles
         private List<InputDevice> _controllers = new List<InputDevice>();
@@ -246,7 +246,7 @@ namespace Gustorvo.RadialMenu
         }
         private void GetTargetController()
         {
-            InputDevices.GetDevicesAtXRNode(XRController, _controllers);
+            InputDevices.GetDevicesAtXRNode(_xRController, _controllers);
             _targetController = _controllers.FirstOrDefault();
         }
 
@@ -268,13 +268,13 @@ namespace Gustorvo.RadialMenu
             // trigger axis
             if (_targetController.TryGetFeatureValue(CommonUsages.trigger, out _axisValue))
             {
-                if (_axisValue > minAxisThreshold) TriggerValueAction = _axisValue;
+                if (_axisValue > _minAxisThreshold) TriggerValueAction = _axisValue;
                 else TriggerValueAction = 0f;
             }
             // grip axis
             if (_targetController.TryGetFeatureValue(CommonUsages.grip, out _axisValue))
             {
-                if (_axisValue > minAxisThreshold) GripValueAction = _axisValue;
+                if (_axisValue > _minAxisThreshold) GripValueAction = _axisValue;
                 else GripValueAction = 0f;
             }
             // trigger button      
@@ -290,13 +290,13 @@ namespace Gustorvo.RadialMenu
             // primary 2D Axis
             if (_targetController.TryGetFeatureValue(CommonUsages.primary2DAxis, out _axis2DValue))
             {
-                if (Mathf.Abs(_axis2DValue.x) > minAxisThreshold || Mathf.Abs(_axis2DValue.y) > minAxisThreshold) Primary2DAxisValueAction = _axis2DValue;
+                if (Mathf.Abs(_axis2DValue.x) > _minAxisThreshold || Mathf.Abs(_axis2DValue.y) > _minAxisThreshold) Primary2DAxisValueAction = _axis2DValue;
                 else Primary2DAxisValueAction = Vector2.zero;
             }
             // secondary 2D Axis
             if (_targetController.TryGetFeatureValue(CommonUsages.secondary2DAxis, out _axis2DValue))
             {
-                if (Mathf.Abs(_axis2DValue.x) > minAxisThreshold || Mathf.Abs(_axis2DValue.y) > minAxisThreshold) Secondary2DAxisValueAction = _axis2DValue;
+                if (Mathf.Abs(_axis2DValue.x) > _minAxisThreshold || Mathf.Abs(_axis2DValue.y) > _minAxisThreshold) Secondary2DAxisValueAction = _axis2DValue;
                 else Secondary2DAxisValueAction = Vector2.zero;
             }
             // primary 2d axis button

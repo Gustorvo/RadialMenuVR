@@ -11,8 +11,7 @@ namespace Gustorvo.RadialMenu
         [SerializeField, OnValueChanged("UpdateLocalZAngleCallback"), /*EnableIf("InEditMode"),*/ Range(-180, 180)] public int _localZAngle = 0;
         [SerializeField] AnimatorSettings _moveSettings;
         [SerializeField] AnimatorSettings _rotateSettings;
-
-
+        public Quaternion TargetRotation => _targetRotation;
         public bool IsRotating => _rotateAnimator.Active; //_angVelocity != 0f;
         public bool IsSlowing { get; private set; }
         public RadialMenu Menu
@@ -25,8 +24,8 @@ namespace Gustorvo.RadialMenu
         }
 
         private RadialMenu _menu;
-        private float _curAngleZ;
-        private float _targetAngleZ;    
+        private Quaternion _targetRotation;
+        private Quaternion _currentRotation;
         private Coroutine _toggleCoroutine, _rotateCoroutine;
         private Vector3[] _targetPositions;
         private Vector3[] _currentPositions;
@@ -51,12 +50,14 @@ namespace Gustorvo.RadialMenu
 
         public void Init()
         {
-            int count = Menu.Items.Count;         
+            _currentRotation = Quaternion.identity;
+            _targetRotation = Quaternion.identity;
+            int count = Menu.Items.Count;
             _moveAnimator = new IAnimator[count];
             _targetPositions = Menu.Items.GetTargetPositions();
             _currentPositions = new Vector3[count];
-           // _curAngleZ = Menu.RotationOffset.eulerAngles.z;
-            _targetAngleZ = _curAngleZ;
+            // _curAngleZ = Menu.RotationOffset.eulerAngles.z;        
+            _targetRotation = Quaternion.identity;
             //  _angVelocity = 0.0f;          
             bool springMovement = _moveSettings.AnimateUsing == Easing.NumericSpring;
             bool springRotation = _rotateSettings.AnimateUsing == Easing.NumericSpring;
@@ -73,63 +74,51 @@ namespace Gustorvo.RadialMenu
             SetPositionAndRotation();
         }
 
-        private void UpdateLocalZAngleCallback() 
+        private void UpdateLocalZAngleCallback()
         {
             if (Menu.InEditMode)
             {
-                Menu.transform.rotation =  Quaternion.AngleAxis(_localZAngle, Vector3.forward);
+                Menu.transform.rotation = Quaternion.AngleAxis(_localZAngle, Vector3.forward);
             }
         }
 
         private void SetPositionAndRotation()
-        {                
-            Quaternion newAnimatedRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+        {
+            // Quaternion newAnimatedRot = Quaternion.AngleAxis(_curAngleZ, Vector3.forward);
+            Quaternion newAnimatedRot = _currentRotation;
             Quaternion lookForwardRot = Quaternion.LookRotation(Menu.AnchorToFollow.forward);
-            Quaternion newTargetRot = lookForwardRot * Quaternion.AngleAxis(_localZAngle, Vector3.forward);
+            Quaternion newTargetRot = lookForwardRot * Quaternion.AngleAxis(_localZAngle, Vector3.forward); // fix this
 
             Menu.transform.rotation = newTargetRot;
             Menu.transform.position = Menu.AnchorToFollow.position;
-
-            if (Menu.RotationType == MenuRotationType.RotateItems)
-            {
-                Menu.Items.SetLocalRotation(newAnimatedRot);
-            }
-            else // rotate attachments
-            {
-                Menu.Attachments.SetLocalRotation(newAnimatedRot);
-            }
+            Menu.Items.SetLocalRotation(newAnimatedRot);
+            Menu.Items.SetForwardForItem(Menu.HoveredItem);
         }
-
-        /// <summary>
-        /// Returns the interpolator (t) between current and target rotation angles on Z axis
-        /// </summary>
-        /// <returns></returns>
-        public float GetInterpolator() => Mathf.InverseLerp(_targetAngleZ - (Menu.ItemsDelataDistDeg * _step), _targetAngleZ, _curAngleZ);
 
         private void SetTargetAngle(int step)
         {
-            // No need to stop the Coroutine if it's running.
-            // animator will pick up the new target value automatically
             _step = step;
-            _targetAngleZ += Menu.ItemsDelataDistDeg * step;
+            //  _targetAngleZ += Menu.ItemsDeltaDistDeg * step;
+            _targetRotation *= Quaternion.Euler(Vector3.forward * Menu.ItemsDeltaDistDeg * step);
             if (_rotateCoroutine == null)
                 _rotateCoroutine = StartCoroutine(AnimateRotationAngleRoutine());
+            // No need to stop the Coroutine if it's running.
+            // animator will pick up the new target value automatically
         }
 
         private IEnumerator AnimateRotationAngleRoutine()
         {
-            bool active = true;         
+            bool active = true;
             while (active)
             {
-                if (Menu.IsActive) _rotateAnimator.Animate(ref _curAngleZ, _targetAngleZ);
-                else _rotateAnimator.Animate(ref _curAngleZ, _targetAngleZ, true, true); // make critically damped system when toggling off
+                _rotateAnimator.Animate(ref _currentRotation, _targetRotation);                
                 // _angVelocity = _rotateAnimator.Velocity;              
                 yield return null;
                 active = _rotateAnimator.Active;
             }
-            _rotateCoroutine = null;          
+            _rotateCoroutine = null;
         }
-
+        private void ToggleMenuItems(bool active) => ToggleMenuItems();
         private void ToggleMenuItems()
         {
             _targetPositions = Menu.Items.GetTargetPositions();
@@ -161,6 +150,9 @@ namespace Gustorvo.RadialMenu
 
         [Button("Previous"), DisableIf("editor")]
         public void DebugPrev() => Menu.ShiftItems(-1);
+
+        [Button("Select"), DisableIf("editor")]
+        public void Select() => Menu.SetSelected(true);
 
         [Button("ToggleVisibility"), DisableIf("editor")]
         public void DebugToggleVisibility() => Menu.ToogleVisibility();

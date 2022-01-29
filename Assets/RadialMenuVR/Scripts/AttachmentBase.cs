@@ -8,11 +8,12 @@ namespace Gustorvo.RadialMenu
     {
         [field: SerializeField] public Transform AttachedObj { get; protected set; }
         [field: SerializeField] public AnimatorSettings MoveSettings { get; private set; }
+        [field: SerializeField] public AnimatorSettings RotateSettings { get; private set; }
         [field: SerializeField] public AnimatorSettings ScaleSettings { get; private set; }
 
-        [SerializeField] protected bool _move = true;
-        [SerializeField] protected bool _scale = true;
-        [SerializeField] protected bool _rotate = true;
+        [SerializeField] protected bool _move = true; // moves when toggling on/off
+        [SerializeField] protected bool _scale = true; // scales when toggling on/off
+        [SerializeField] protected bool _rotate = true; // rotates around the circle's center
         [SerializeField] protected bool _movesAsRadiusChanging = true;
         [SerializeField] protected bool _scalesAsRadiusChanging = true;
         [SerializeField] protected bool _alwaysLookUpRotation = true;
@@ -26,6 +27,7 @@ namespace Gustorvo.RadialMenu
             }
         }
         protected IAnimator MoveAnimator { get; private set; }
+        protected IAnimator RotateAnimator { get; private set; }
         protected IAnimator ScaleAnimator { get; private set; }
         protected Vector3 TargetPosition
         {
@@ -40,7 +42,17 @@ namespace Gustorvo.RadialMenu
                 return pos;
             }
         }
-
+        protected Quaternion TargetRotation
+        {
+            get
+            {
+                if (Menu.IsActive && _rotate)
+                {
+                    return Menu.Mover.TargetRotation;
+                }
+                return Menu.IsActive ? _initialRotation : Quaternion.identity;
+            }
+        }
         protected Vector3 TargetScale
         {
             get
@@ -57,6 +69,7 @@ namespace Gustorvo.RadialMenu
         private float _radDelta => Menu.Radius - _initRad;
         private RadialMenu _menu;
         private Vector3 _initialPosition, _initialScale;
+        private Quaternion _initialRotation;
         private Vector3 _dirToCenter;
         private float _initRad;
         private bool _init = false;
@@ -71,20 +84,23 @@ namespace Gustorvo.RadialMenu
         {
             if (AttachedObj == null) AttachedObj = transform;
             bool springMovement = MoveSettings.AnimateUsing == Easing.NumericSpring;
+            bool springRotation = RotateSettings.AnimateUsing == Easing.NumericSpring;
             bool springScale = ScaleSettings.AnimateUsing == Easing.NumericSpring;
             MoveAnimator = springMovement ? (IAnimator)new NumericSpring(MoveSettings) : (IAnimator)new AnimCurveLerper(MoveSettings);
+            RotateAnimator = springRotation ? (IAnimator)new NumericSpring(RotateSettings) : (IAnimator)new AnimCurveLerper(RotateSettings);
             ScaleAnimator = springScale ? (IAnimator)new NumericSpring(ScaleSettings) : (IAnimator)new AnimCurveLerper(ScaleSettings);
             SetInitialPositionAndScale(AttachedObj.localPosition);
         }
 
         [Button]
-        public void SnapToChosenAndSave()
+        public void SnapToSelectedAndSave()
         {
             if (!Menu.Initialized) Menu.Init();
-            Vector3 chosenPosLocal = Menu.Chosen.GetMenuRelativePos();
-            Vector3 chosenPos = Quaternion.Inverse(transform.localRotation) * chosenPosLocal;
-            SetInitialPositionAndScale(chosenPos);
+            Vector3 posLocal = Menu.HoveredItem.GetMenuRelativePos();
+            Vector3 pos = Quaternion.Inverse(transform.localRotation) * posLocal;
+            SetInitialPositionAndScale(pos);
             SetPosition(TargetPosition);
+            SetLocalRotation(TargetRotation);
             SetScale(TargetScale);
         }
 
@@ -111,6 +127,7 @@ namespace Gustorvo.RadialMenu
             _scaleDelta = AttachedObj.localScale.x - Menu.Scaler.UniformScale;
             _initialPosition = position;
             _dirToCenter = _initialPosition.normalized;
-        }      
+            _initialRotation = AttachedObj.localRotation;
+        }
     }
 }
