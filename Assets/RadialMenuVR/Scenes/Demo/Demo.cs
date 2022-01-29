@@ -7,64 +7,34 @@ namespace Gustorvo.RadialMenu
 {
     public class Demo : MonoBehaviour
     {
-        [SerializeField] Transform _parent;
         [SerializeField] RadialMenu[] _menuArray;
-        [SerializeField, Range(0.1f, 1.2f)] float _delay = 0.5f;
+        [SerializeField, Range(0.1f, 2f)] float _delay = 1.25f;
         [SerializeField] bool _allowReverseDirection = true;
-        private bool _running;
-        private bool RunningInEditor => Application.isEditor && Application.isPlaying;  // needed for "EnableIf" attribute drawer
-        private bool _notRunning => !_running; // needed for "EnableIf" attribute drawer
-        private bool _animatingRadius = false;
-        private Coroutine _radiusCoroutine;
+        [SerializeField] Transform _parent;
+        private bool _demoRunning;
+        private bool _inPlayMode => Application.isEditor && Application.isPlaying;
+        private Coroutine _toggleCoroutine;
 
-        #region Buttons
-        [Button]
-        public void PopulateArrayFromParent()
+        private IEnumerator Start()
         {
-            var allMenus = _parent.GetComponentsInChildren<RadialMenu>();
-            _menuArray = allMenus;
+            yield return new WaitForSeconds(2f);
+            StartDemo();
+            ToggleVisibility();
         }
-
-        [Button, EnableIf(EConditionOperator.And, "RunningInEditor", "_notRunning")]
-        public void StartDemo()
-        {
-            if (!_running) StartCoroutine(StartAnimatingMenusRoutine());           
-        }
-        [Button, EnableIf(EConditionOperator.And, "RunningInEditor", "_running")]
-        public void StopDemo()
-        {
-            StopAllCoroutines();
-            _running = false;
-            _animatingRadius = false;
-        }
-
-        [Button, EnableIf(EConditionOperator.And, "RunningInEditor", "_running")]
-        public void ToggleAnimateRadius()
-        {
-            if (!_running) return;
-            if (!_animatingRadius)
-                _radiusCoroutine = StartCoroutine(AnimateRadiusRoutine());
-            else if (_animatingRadius && _radiusCoroutine != null)
-            {
-                StopCoroutine(_radiusCoroutine);
-                _animatingRadius = false;
-            }
-        }
-
-        #endregion // end Buttons
 
         private IEnumerator StartAnimatingMenusRoutine()
         {
-            _running = true;           
+            _demoRunning = true;           
             int step = 1;
-            while (_running)
+            while (_demoRunning)
             {
                 for (int i = 0; i < _menuArray.Length; i++)
                 {
                     _menuArray[i].ShiftItems(step);
+                    _menuArray[i].SetSelected(true) ;                    
                 }
-                bool isFirst = _menuArray[0].ChosenIndex == 0;
-                bool isLast = _menuArray[0].ChosenIndex == _menuArray[0].Items.Count - 1;
+                bool isFirst = _menuArray[0].HoveredIndex == 0;
+                bool isLast = _menuArray[0].HoveredIndex == _menuArray[0].Items.Count - 1;
                 if ((isFirst || isLast) && _allowReverseDirection)
                 {
                     // reverse direction                  
@@ -74,33 +44,51 @@ namespace Gustorvo.RadialMenu
             }
         }
 
-        private IEnumerator AnimateRadiusRoutine()
+        private IEnumerator ToggleVisibilityRoutine()
         {
-            _animatingRadius = true;
-            float a = RadialMenu.minRadius;
-            float b = .3f;
-            float t = 0f;
-            float newRadius;
-            while (_animatingRadius)
-            {                
-                newRadius = Mathf.Lerp(a, b, t);
+            _demoRunning = true;         
+            while (_demoRunning)
+            {
                 for (int i = 0; i < _menuArray.Length; i++)
                 {
-                    _menuArray[i].Radius = newRadius;
-                    _menuArray[i].Rebuild();
+                    yield return new WaitForSeconds(_delay);               
+                    _menuArray[i].ToogleVisibility();
+                    yield return new WaitForSeconds(_delay);               
+                    _menuArray[i].ToogleVisibility();
                 }
-                if (newRadius == b)
-                {
-                    // reverse
-                    float temp = a;
-                    a = b;
-                    b = temp;
-                    t = 0f;
-                }
-                else
-                t += .5f;
-                yield return new WaitForSeconds(_delay*2f);
-            }           
+            }
         }
+
+        #region Buttons
+        private bool _demoNotRunning => !_demoRunning; // needed for "EnableIf" attribute drawer 
+        [Button, DisableIf("_inPlayMode")]
+        public void PopulateArrayFromParent()
+        {
+            var allMenus = _parent.GetComponentsInChildren<RadialMenu>();
+            _menuArray = allMenus;
+        }
+
+        [Button, EnableIf(EConditionOperator.And, "_inPlayMode", "_demoNotRunning")]
+        public void StartDemo()
+        {
+            if (!_demoRunning) StartCoroutine(StartAnimatingMenusRoutine());           
+        }
+       
+        [Button, EnableIf(EConditionOperator.And, "_inPlayMode", "_demoNotRunning")]
+        public void StopDemo()
+        {
+            StopAllCoroutines();
+            _demoRunning = false;         
+            _toggleCoroutine = null;           
+        }      
+
+        [Button, EnableIf(EConditionOperator.And, "_inPlayMode", "_demoNotRunning")]
+        public void ToggleVisibility()
+        {
+            if (_toggleCoroutine == null) // start only once
+            _toggleCoroutine = StartCoroutine(ToggleVisibilityRoutine());
+        }
+
+        #endregion // end Buttons
     }
 }
